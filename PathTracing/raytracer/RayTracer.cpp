@@ -3,7 +3,7 @@ const double EPS_LOOSE = 1e-6;
 
 RayTracer::RayTracer()
 {
-	mcSampleNum = 200;
+	mcSampleNum = 1000;
 	pxSampleNum = 1;
 	threadNum = 10;
 	blockSize = 1;
@@ -113,7 +113,7 @@ void RayTracer::thread_task()
 
 Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 energy)
 {
-	if(currDepth>=maxRecursiveDepth) return Color3::BLACK;
+	if(currDepth>maxRecursiveDepth || Length2(energy)<EPS_LOOSE) return Color3::BLACK;
 
 	//TODO没有判断可能直接和光源相交
 	IntersectResult& result = scene->intersect(ray);
@@ -124,15 +124,19 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 energy)
 		if(attr.emission!=Color3::NONE) return attr.emission;
 		else
 		{
-			Color3 color;
-			Ray& newRay = mcSelect(ray,result);
-			Color3 color2 = trace(newRay,++currDepth);
+			if(currDepth < maxRecursiveDepth)
+			{
+				Color3 color;
+				Ray& newRay = mcSelect(ray,result);
+				Color3& color2 = trace(newRay,++currDepth);
 
-			if(newRay.souce == SOURCE::DIFFUSE_REFLECT) color+=color2.multiple(attr.kd);
-			else if(newRay.souce == SOURCE::SPECULA_REFLECT) color+=color2.multiple(attr.ks);
-			else color+=color2.multiple(attr.kt);
+				if(newRay.souce == SOURCE::DIFFUSE_REFLECT) color+=color2.multiple(attr.kd);
+				else if(newRay.souce == SOURCE::SPECULA_REFLECT) color+=color2.multiple(attr.ks);
+				else color+=color2.multiple(attr.kt);
 
-			return color;
+				return color;
+			}
+			else return scene->phong(result,ray);
 		}
 	}
 }

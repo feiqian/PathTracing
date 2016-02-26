@@ -69,12 +69,21 @@ Ray* Scene::getRays(double x,double y,int pxSampleNum)
 	return rays;
 }
 
-bool Scene::isInShadow(Ray& ray)
+bool Scene::isInShadow(Ray& ray,IPrimitive* light)
 {
+	IntersectResult& shadowResult = intersect(ray);
+	if(shadowResult.isHit()&&shadowResult.primitive!=light) return true;
+	else return false;
+}
+
+Color3 Scene::phong(IntersectResult& result,Ray& ray)
+{
+	Color3 color;
+	//TODO 没有考虑光源之间的相互遮挡
 	for(std::vector<IPrimitive*>::iterator it = primitives.begin();it!=primitives.end();++it)
 	{
-		IntersectResult& result = (*it)->intersect(ray);
-		if(result.isHit()) return true;
+		if((*it)->attr.emission==Color3::NONE) continue;
+		color += ((ILight*)(*it))->render(result,ray,this);
 	}
-	return false;
+	return color;
 }

@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "../common/VMath.h"
 #include "../common/IntersectResult.h"
+#include "../light/ILight.h"
 using std::vector;
 
 class Scene
@@ -14,7 +15,8 @@ public:
 	~Scene();
 	IntersectResult intersect(Ray& ray);
 	Ray* getRays(double x,double y,int pxSampleNum);
-	bool isInShadow(Ray& ray);
+	bool isInShadow(Ray& ray,IPrimitive* light);
+	Color3 phong(IntersectResult& result,Ray& ray);
 	void setSize(int width,int height);
 	int getWidth();
 	int getHeight();
