@@ -79,20 +79,20 @@ void RayTracer::thread_task()
 			do
 			{
 				Color3 rgb = Limit(trace(rays[0]),0,1);
-				if(rgb!=Color3::BLACK) ++cnt2;
-				Color3 prev2 = j?total2 / j:Color3::BLACK;
+				//if(rgb!=Color3::BLACK) ++cnt2;
+				//Color3 prev2 = j?total2 / j:Color3::BLACK;
 
-				/*	if(Length2(rgb - prev2)<EPS_LOOSE)
-				{
-				++cnt2;
-				if(cnt2 == 2) break;
-				}
-				else cnt2 = 0;*/
+				//if(Length2(rgb - prev2)<EPS_LOOSE)
+				//{
+				//	++cnt2;
+				//	if(cnt2 == 2) break;
+				//}
+				//else cnt2 = 0;
 
 				total2+=rgb;
 				++j;
 			}while (j<mcSampleNum);
-			if(cnt2) total2/=cnt2;
+			total2/=j;
 
 			Color3 prev = i?total1 / i:Color3::BLACK;
 			if(Length2(total1 - prev)<EPS_LOOSE)
@@ -111,28 +111,30 @@ void RayTracer::thread_task()
 	}
 }
 
-Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 energy)
+Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 {
-	if(currDepth>maxRecursiveDepth || Length2(energy)<EPS_LOOSE) return Color3::BLACK;
+	if(currDepth>maxRecursiveDepth || Length2(weight)<EPS_LOOSE) 
+		return Color3::BLACK;
 
 	//TODO没有判断可能直接和光源相交
 	IntersectResult& result = scene->intersect(ray);
-	if(!result.isHit()) return scene->bgColor;
+	if(!result.isHit()) 
+		return Color3::BLACK;
 	else 
 	{
 		MaterialAttribute& attr = result.primitive->attr;
-		if(attr.emission!=Color3::NONE) return attr.emission;
+		if(attr.emission!=Color3::NONE) 
+			return weight*attr.emission;
 		else
 		{
 			if(currDepth < maxRecursiveDepth)
 			{
 				Color3 color;
+				Vec3 reflection = attr.kd+attr.ks+attr.kt;
 				Ray& newRay = mcSelect(ray,result);
-				Color3& color2 = trace(newRay,++currDepth);
 
-				if(newRay.souce == SOURCE::DIFFUSE_REFLECT) color+=color2.multiple(attr.kd);
-				else if(newRay.souce == SOURCE::SPECULA_REFLECT) color+=color2.multiple(attr.ks);
-				else color+=color2.multiple(attr.kt);
+				Color3& color2 = trace(newRay,++currDepth,reflection*weight);
+				color+=color2.multiple(weight);
 
 				return color;
 			}
@@ -159,7 +161,7 @@ Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result)
 			newRay.direction.x = (double)rand() / RAND_MAX * 2 - 1;
 			newRay.direction.y = (double)rand() / RAND_MAX * 2 - 1;
 			newRay.direction.z = (double)rand() / RAND_MAX * 2 - 1;
-		} while (Length2(newRay.direction)<EPS || Dot(newRay.direction,result.normal)<0);
+		} while (Length2(newRay.direction)<EPS || Dot(newRay.direction,result.normal)<=0);
 		newRay.direction = Normalize(newRay.direction);
 		newRay.souce = SOURCE::DIFFUSE_REFLECT;
 	}

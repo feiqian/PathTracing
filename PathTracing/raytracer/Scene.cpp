@@ -4,7 +4,6 @@ Scene::Scene()
 {
 	color = NULL;
 	this->setSize(500,500);
-	bgColor = Vec3::BLACK;
 }
 
 Scene::~Scene()
@@ -72,7 +71,8 @@ Ray* Scene::getRays(double x,double y,int pxSampleNum)
 bool Scene::isInShadow(Ray& ray,IPrimitive* light)
 {
 	IntersectResult& shadowResult = intersect(ray);
-	if(shadowResult.isHit()&&shadowResult.primitive!=light) return true;
+	if(shadowResult.isHit()&&shadowResult.primitive!=light) 
+		return true;
 	else return false;
 }
 
@@ -83,7 +83,7 @@ Color3 Scene::phong(IntersectResult& result,Ray& ray)
 	for(std::vector<IPrimitive*>::iterator it = primitives.begin();it!=primitives.end();++it)
 	{
 		if((*it)->attr.emission==Color3::NONE) continue;
-		color += ((ILight*)(*it))->render(result,ray,this);
+		color += (dynamic_cast<ILight*>(*it))->render(result,ray,this);
 	}
 	return color;
 }

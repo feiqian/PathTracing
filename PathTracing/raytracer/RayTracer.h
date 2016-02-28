@@ -15,7 +15,7 @@ public:
 	Scene* getScene();
 private:
 	void thread_task();
-	Color3 trace(Ray& ray,int currDepth = 0,Vec3 energy = Vec3(1,1,1));
+	Color3 trace(Ray& ray,int currDepth = 0,Vec3 weight = Vec3(1,1,1));
 	Ray mcSelect(Ray& ray,IntersectResult& result);
 
 	//TODO blockSize

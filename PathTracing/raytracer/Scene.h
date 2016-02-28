@@ -23,7 +23,6 @@ public:
 
 	vector<IPrimitive*> primitives;
 	Camera* camera;
-	Color3 bgColor;
 	Color3** color;
 private:
 	//´°¿Ú¿í¸ß
