@@ -4,22 +4,31 @@ Color3 PointLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 {
 	Color3 rgb;
 	MaterialAttribute& intersectAttr = result.primitive->attr;
-	Vec3 r = modelMatrix*Vec4(origin,1.0)-result.point;
+	Vec3&r = origin - result.point;
 	double rr = Length(r);
 
-	if(!scene->isInShadow(Ray(result.point-ray.direction*EPS,r),this))
+	if(!scene->isInShadow(Ray(result.point,r),this))
 	{
-		//calculate the diffuse color
 		Vec3 s = Normalize(r);
-		double mDots = Dot(s,result.normal);
-		if(mDots>0.0) rgb+= (mDots*intersectAttr.kd).multiple(intersectAttr.color);
-
-		//calculate the specular color
-		Vec3 v = ray.direction.flip();
-		Vec3 h = Normalize(s+v);
-		double mDotH = Dot(h,result.normal);
-		if(mDotH>0.0) rgb+= (pow(mDotH,intersectAttr.roughness)*intersectAttr.ks).multiple(attr.emission);
+		
+		if(intersectAttr.kd!=Color3::BLACK)
+		{
+			//calculate the diffuse color
+			double mDots = Dot(s,result.normal);
+			if(mDots>0.0) rgb+= mDots*intersectAttr.kd*intersectAttr.color
+				*intense/PI;
+		}
+		
+		if(intersectAttr.ks!=Color3::BLACK)
+		{
+			//calculate the specular color
+			Vec3 v = ray.direction.flip();
+			Vec3 h = Normalize(s+v);
+			double mDotH = Dot(h,result.normal);
+			if(mDotH>0.0) rgb+= pow(mDotH,intersectAttr.roughness)*intersectAttr.ks
+				*attr.emission*intense
+				*(intersectAttr.roughness+1)/(2*PI);
+		}
 	}
-
 	return rgb;
 }

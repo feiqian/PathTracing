@@ -11,14 +11,15 @@ IntersectResult Sphere::intersect(Ray& ray)
 	IntersectResult result;
 	Ray& transformRay = getTransformRay(ray);
 
+	double A = Length2(transformRay.direction);
 	double B = Dot(transformRay.direction,transformRay.origin);
 	double C = Length2(transformRay.origin) - 1.0;
-	double delta = B*B - C;
+	double delta = B*B - A*C;
 
 	if(delta>=0)
 	{
 		delta = sqrt(delta);
-		double time = -B - delta;
+		double time = (-B - delta)/A;
 
 		//排除光线起点在球内的情况
 		if(DoubleCompare(time,0)>0)

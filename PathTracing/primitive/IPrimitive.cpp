@@ -2,7 +2,10 @@
 
 Ray IPrimitive::getTransformRay(Ray& ray)
 {
-	return Ray(modelMatrixInverse * Vec4(ray.origin,1.0),modelMatrixInverse * ray.direction);
+	Ray transformRay;
+	transformRay.origin = modelMatrixInverse * Vec4(ray.origin,1.0);
+	transformRay.direction = modelMatrixInverse * ray.direction;
+	return transformRay;
 }
 
 Vec3 IPrimitive::getTransformNormal(Vec3 normal)

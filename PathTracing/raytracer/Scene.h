@@ -16,7 +16,7 @@ public:
 	IntersectResult intersect(Ray& ray);
 	Ray* getRays(double x,double y,int pxSampleNum);
 	bool isInShadow(Ray& ray,IPrimitive* light);
-	Color3 phong(IntersectResult& result,Ray& ray);
+	Color3 directIllumination(IntersectResult& result,Ray& ray);
 	void setSize(int width,int height);
 	int getWidth();
 	int getHeight();

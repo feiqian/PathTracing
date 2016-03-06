@@ -60,9 +60,9 @@ Ray* Scene::getRays(double x,double y,int pxSampleNum)
 	{
 		for(int i=0;i<pxSampleNum;++i)
 		{
-			double randomX = (double)rand()/RAND_MAX*dx;
-			double randomY = (double)rand()/RAND_MAX*dy;
-			rays[i] = camera->getRay(x+randomX,y+randomY);
+			double randomX = (double)rand()/RAND_MAX;
+			double randomY = (double)rand()/RAND_MAX;
+			rays[i] = camera->getRay((x+randomX)*dx,(y+randomY)*dy);
 		}
 	}
 	return rays;
@@ -76,7 +76,7 @@ bool Scene::isInShadow(Ray& ray,IPrimitive* light)
 	else return false;
 }
 
-Color3 Scene::phong(IntersectResult& result,Ray& ray)
+Color3 Scene::directIllumination(IntersectResult& result,Ray& ray)
 {
 	Color3 color;
 	//TODO 没有考虑光源之间的相互遮挡

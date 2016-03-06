@@ -19,19 +19,22 @@ void Parser::parse(const char* fileName,Scene* scene)
 	IPrimitive* cube = new Cube();
 	cube->rotate(-30,Vec3(0,1,0));
 	cube->rotate(-20,Vec3(1,0,0));
-	cube->translate(-1,0,-3);
+	cube->translate(-1,0,-5);
 	MaterialAttribute attr2;
 	attr2.color = Color3(0,0,1);
 	attr2.ka = Vec3(0.19,0.19,0.19);
-	attr2.kd = Vec3(0.51,0.51,0.51);
-	attr2.ks = Vec3(0.51,0.51,0.51);
+	attr2.kd = Vec3(0.41,0.1,0.41);
+	attr2.ks = Vec3(0.41,0.41,0.41);
 	attr2.roughness = 51.2;
 	cube->attr = attr2;
 	scene->primitives.push_back(cube);
 
-	Plane* plane = new Plane(Point3(-100,-5,0),Vec3(1000,0,0),Vec3(0,0,-1000));
-	Plane* plane2 = new Plane(Point3(-5,-5,0),Vec3(0,0,-1000),Vec3(0,1000,0));
-	Plane* plane3 = new Plane(Point3(-100,-5,-10),Vec3(1000,0,0),Vec3(0,1000,0));
+	Plane* plane1 = new Plane(Point3(-5,-5,10),Vec3(1000,0,0),Vec3(0,0,-1000));//floor
+	Plane* plane2 = new Plane(Point3(-5,-5,10),Vec3(0,0,-1000),Vec3(0,1000,0));//left
+	Plane* plane3 = new Plane(Point3(-5,-5,-10),Vec3(1000,0,0),Vec3(0,1000,0));//back
+	Plane* plane4 = new Plane(Point3(-5,5,10),Vec3(0,0,-1000),Vec3(1000,0,0));//ceil
+	Plane* plane5 = new Plane(Point3(5,-5,10),Vec3(0,1000,0),Vec3(0,0,-1000));//right
+	Plane* plane6 = new Plane(Point3(-5,-5,10),Vec3(0,1000,0),Vec3(1000,0,0));//front
 
 	MaterialAttribute attr3;
 	attr3.color = Color3(1,1,1);
@@ -39,15 +42,21 @@ void Parser::parse(const char* fileName,Scene* scene)
 	attr3.kd = Vec3(0.5, 0.5, 0.5);
 	attr3.ks = Vec3(0,0,0);
 	attr3.roughness = 89.6;
-	plane->attr = attr3;
+	plane1->attr = attr3;
 	plane2->attr = attr3;
 	plane3->attr = attr3;
+	plane4->attr = attr3;
+	plane5->attr = attr3;
+	plane6->attr = attr3;
 
-	scene->primitives.push_back(plane);
+	scene->primitives.push_back(plane1);
 	scene->primitives.push_back(plane2);
 	scene->primitives.push_back(plane3);
+	scene->primitives.push_back(plane4);
+	scene->primitives.push_back(plane5);
+	scene->primitives.push_back(plane6);
 
-	PointLight* pointLight = new PointLight(Vec3(0,5,0),Vec3::WHITE,10);
+	PointLight* pointLight = new PointLight(Vec3(0,5,-5),Vec3::WHITE,1);
 	scene->primitives.push_back(pointLight);
 
 }
