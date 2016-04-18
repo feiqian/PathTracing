@@ -9,7 +9,7 @@
 
 struct Parser
 {
-	static void parse(const char* fileName,Scene* scene);
+	static bool parse(const char* fileName,Scene* scene);
 };
 
 

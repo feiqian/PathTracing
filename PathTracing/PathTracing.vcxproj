@@ -13,11 +13,14 @@
   <ItemGroup>
     <ClCompile Include="common\GlutDisplay.cpp" />
     <ClCompile Include="common\KDTree.cpp" />
+    <ClCompile Include="common\ObjParser.cpp" />
     <ClCompile Include="common\Parser.cpp" />
+    <ClCompile Include="common\Utils.cpp" />
     <ClCompile Include="light\PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="primitive\Cube.cpp" />
     <ClCompile Include="primitive\IPrimitive.cpp" />
+    <ClCompile Include="primitive\Mesh.cpp" />
     <ClCompile Include="primitive\Plane.cpp" />
     <ClCompile Include="primitive\Sphere.cpp" />
     <ClCompile Include="primitive\Triangle.cpp" />
@@ -29,24 +32,24 @@
   <ItemGroup>
     <ClInclude Include="common\GlutDisplay.h" />
     <ClInclude Include="common\KDTree.h" />
+    <ClInclude Include="common\Material.h" />
+    <ClInclude Include="common\ObjParser.h" />
     <ClInclude Include="common\Parser.h" />
+    <ClInclude Include="common\Utils.h" />
     <ClInclude Include="common\VMath.h" />
     <ClInclude Include="common\IntersectResult.h" />
     <ClInclude Include="light\ILight.h" />
     <ClInclude Include="light\PointLight.h" />
     <ClInclude Include="primitive\Cube.h" />
     <ClInclude Include="primitive\IPrimitive.h" />
+    <ClInclude Include="primitive\Mesh.h" />
     <ClInclude Include="primitive\Plane.h" />
     <ClInclude Include="primitive\Sphere.h" />
     <ClInclude Include="primitive\Triangle.h" />
     <ClInclude Include="raytracer\Camera.h" />
-    <ClInclude Include="common\MaterialAttribute.h" />
     <ClInclude Include="raytracer\Ray.h" />
     <ClInclude Include="raytracer\RayTracer.h" />
     <ClInclude Include="raytracer\Scene.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test\test1.sdl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{355D9B5E-7D76-4EE7-8C12-FDD3C0646249}</ProjectGuid>

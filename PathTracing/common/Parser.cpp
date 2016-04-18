@@ -1,13 +1,16 @@
 #include "Parser.h"
 
-void Parser::parse(const char* fileName,Scene* scene)
+bool Parser::parse(const char* fileName,Scene* scene)
 {
 	Camera* camera = new Camera;
 	camera->setAspect(scene->getWidth()/scene->getHeight());
 	scene->camera = camera;
 
+	PointLight* pointLight = new PointLight(Vec3(0,5,-5),Vec3::WHITE,1);
+	scene->primitives.push_back(pointLight);
+
 	IPrimitive* sphere = new Sphere(Point3(2,0,-5),1);
-	MaterialAttribute attr;
+	Material attr;
 	attr.color = Color3(1,0,0);
 	attr.ka = Vec3(0.19,0.07,0.02);
 	attr.kd = Vec3(0.70,0.27,0.08);
@@ -20,7 +23,7 @@ void Parser::parse(const char* fileName,Scene* scene)
 	cube->rotate(-30,Vec3(0,1,0));
 	cube->rotate(-20,Vec3(1,0,0));
 	cube->translate(-1,0,-5);
-	MaterialAttribute attr2;
+	Material attr2;
 	attr2.color = Color3(0,0,1);
 	attr2.ka = Vec3(0.19,0.19,0.19);
 	attr2.kd = Vec3(0.41,0.1,0.41);
@@ -36,7 +39,7 @@ void Parser::parse(const char* fileName,Scene* scene)
 	Plane* plane5 = new Plane(Point3(5,-5,10),Vec3(0,1000,0),Vec3(0,0,-1000));//right
 	Plane* plane6 = new Plane(Point3(-5,-5,10),Vec3(0,1000,0),Vec3(1000,0,0));//front
 
-	MaterialAttribute attr3;
+	Material attr3;
 	attr3.color = Color3(1,1,1);
 	attr3.ka = Vec3(0, 0, 0);
 	attr3.kd = Vec3(0.5, 0.5, 0.5);
@@ -56,7 +59,5 @@ void Parser::parse(const char* fileName,Scene* scene)
 	scene->primitives.push_back(plane5);
 	scene->primitives.push_back(plane6);
 
-	PointLight* pointLight = new PointLight(Vec3(0,5,-5),Vec3::WHITE,1);
-	scene->primitives.push_back(pointLight);
-
+	return true;
 }

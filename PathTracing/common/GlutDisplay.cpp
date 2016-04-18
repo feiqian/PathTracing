@@ -50,9 +50,8 @@ void GlutDisplay::setRayTracer(RayTracer* rayTracer)
 }
 
 
-void GlutDisplay::render(int argc, char**argv)
+void GlutDisplay::render()
 {
-	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH|GLUT_STENCIL);
 	glutInitWindowSize(rayTracer->getScene()->getWidth(), rayTracer->getScene()->getHeight());
 	glutCreateWindow("Ray Tracer");

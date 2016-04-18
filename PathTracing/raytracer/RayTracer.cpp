@@ -1,4 +1,9 @@
+#include <omp.h>
 #include "RayTracer.h"
+#include "../common/Parser.h"
+#include "../common/GlutDisplay.h"
+#include "../common/Utils.h"
+
 const double EPS_LOOSE = 1e-8;
 
 RayTracer::RayTracer()
@@ -8,118 +13,88 @@ RayTracer::RayTracer()
 	threadNum = 1;
 	blockSize = 1;
 	maxRecursiveDepth = 2;
-
-	scene = NULL;
-	threadPool = new std::thread[threadNum];
 }
 
 RayTracer::~RayTracer()
 {
-	delete [] threadPool;
+	
 }
 
 Scene* RayTracer::getScene()
 {
-	return scene;
-}
-
-void RayTracer::setScene(Scene* scene)
-{
-	this->scene = scene;
+	return &scene;
 }
 
 Color3** RayTracer::render()
 {
-	nx=0;
-	ny=0;
+	int width = scene.getWidth(),height = scene.getHeight();
+	double progress = 0,increment = 100.0/(width*height);
 
-	for(int i=0;i<threadNum;++i)
+	for(int y=0;y<height;++y)
 	{
-		threadPool[i] = std::thread(std::bind(&RayTracer::thread_task, this));
-	}
-	for(int i=0;i<threadNum;++i)
-	{
-		threadPool[i].join();
-	}
-
-	return scene->color;
-}
-
-void RayTracer::thread_task()
-{
-	while (true)
-	{
-		mtx.lock();
-		int x = nx;
-		int y = ny;
-
-		++nx;
-		if(nx == scene->getWidth()){
-			nx = 0;
-			++ny;
-		}
-		mtx.unlock();
-
-		if(y >= scene->getHeight()) 
-			break;
-		printf("%d %d\n",x,y);
-
-		//TODO do 2*2 subpixels
-		int i=0;
-		int cnt1=0;
-		Color3 total1;
-		Ray* rays = scene->getRays(x,y,pxSampleNum);
-
-		do 
+		for(int x=0;x<width;++x)
 		{
-			int j = 0;
-			int cnt2 = 0;
-			Color3 total2;
+			//TODO do 2*2 subpixels
+			int i=0;
+			int cnt1=0;
+			Color3 total1;
+			Ray* rays = scene.getRays(x,y,pxSampleNum);
 
-			do
+			do 
 			{
-				Color3 rgb = Limit(trace(rays[i]),0,1);
-				Color3 prev2 = j?total2 / j:Color3::NONE;
+				int j = 0;
+				int cnt2 = 0;
+				Color3 total2;
 
-				if(Length2(rgb - prev2)<EPS_LOOSE)
+				do
 				{
-					++cnt2;
-					if(cnt2 == 2) break;
+					Color3 rgb = Limit(trace(rays[i]),0,1);
+					Color3 prev2 = j?total2 / j:Color3::NONE;
+
+					if(Length2(rgb - prev2)<EPS_LOOSE)
+					{
+						++cnt2;
+						if(cnt2 == 2) break;
+					}
+					else cnt2 = 0;
+
+					total2+=rgb;
+					++j;
+				}while (j<mcSampleNum);
+				total2/=j;
+
+				Color3 prev = i?total1 / i:Color3::NONE;
+				if(Length2(total1 - prev)<EPS_LOOSE)
+				{
+					++cnt1;
+					if(cnt1 == 2) break;
 				}
-				else cnt2 = 0;
+				else cnt1 = 0;
 
-				total2+=rgb;
-				++j;
-			}while (j<mcSampleNum);
-			total2/=j;
+				total1+=total2;
+				++i;
+			} while (i<pxSampleNum);
 
-			Color3 prev = i?total1 / i:Color3::NONE;
-			if(Length2(total1 - prev)<EPS_LOOSE)
-			{
-				++cnt1;
-				if(cnt1 == 2) break;
-			}
-			else cnt1 = 0;
+			scene.color[y][x] = total1/i;
+			delete [] rays;
 
-			total1+=total2;
-			++i;
-		} while (i<pxSampleNum);
-
-		scene->color[y][x] = total1/i;
-		delete [] rays;
+			Utils::PrintProgress(progress,increment);
+		}
 	}
-}
 
+	return scene.color;
+}
+ 
 Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 {
 	if(currDepth>maxRecursiveDepth || Length2(weight)<EPS_LOOSE) 
 		return Color3::BLACK;
 
-	IntersectResult& result = scene->intersect(ray);
+	IntersectResult& result = scene.intersect(ray);
 	if(!result.isHit())  return Color3::BLACK;
 	else 
 	{
-		MaterialAttribute& attr = result.primitive->attr;
+		Material& attr = result.primitive->attr;
 		if(attr.emission!=Color3::NONE) 
 			return attr.emission;
 		else
@@ -141,7 +116,7 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 				break;
 			}
 
-			Color3& directIllumination= scene->directIllumination(result,ray);
+			Color3& directIllumination= scene.directIllumination(result,ray);
 			return directIllumination + indirectIllumination;
 		}
 	}
@@ -150,7 +125,7 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result)
 {
 	Ray newRay;
-	MaterialAttribute& attr = result.primitive->attr;
+	Material& attr = result.primitive->attr;
 	double num[3];
 	num[0]= Dot(attr.kd,Vec3(1,1,1));
 	num[1]= Dot(attr.ks,Vec3(1,1,1))+ num[0];
@@ -199,4 +174,13 @@ Vec3 RayTracer::importanceSampleUpperHemisphere(Vec3& up, double n)
 
 	Mat4 mat4(right,up,front);
 	return Normalize(mat4*sample);
+}
+
+void RayTracer::run(const char* obj_file)
+{
+	if(Parser::parse(obj_file,&scene))
+	{
+		GlutDisplay::setRayTracer(this);
+		GlutDisplay::render();
+	}
 }

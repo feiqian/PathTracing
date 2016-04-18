@@ -1,20 +1,33 @@
-#include <stdio.h>
+#include <iostream>
+#include <string>
 #include "raytracer/RayTracer.h"
-#include "raytracer/Scene.h"
-#include "common/Parser.h"
-#include "common/GlutDisplay.h"
+#include "common/Utils.h"
+using namespace std;
 
 int main(int argc,char *argv[])
 {
-	char* inputFileName = "default.txt";
-	if(argc>=2) inputFileName = argv[1];
+	string objDirectory="../data";	
+	vector<string> files = Utils::GetFiles(objDirectory,"obj");
 
-	Scene* scene = new Scene;
-	Parser::parse(inputFileName,scene);
-	RayTracer* rayTracer = new RayTracer;
-	rayTracer->setScene(scene);
-	GlutDisplay::setRayTracer(rayTracer);
-	GlutDisplay::render(argc,argv);
+	if(files.size())
+	{
+		for(int i=0,len=files.size();i<len;++i)
+		{
+			cout<<i<<":"<<files[i]<<endl;
+		}
 
+		int id;
+		while(true)
+		{
+			cout<<"please choose one obj file to render: ";
+			cin>>id;
+			if(id>=0&&id<files.size()) break;
+			else cout<<"valid input"<<endl;
+		}
+
+		string objFile =  objDirectory+"/"+files[id];
+		RayTracer* rayTracer = new RayTracer;
+		rayTracer->run(objFile.c_str());
+	}
 	return 0;
 }

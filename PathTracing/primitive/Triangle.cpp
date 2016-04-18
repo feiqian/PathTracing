@@ -1,6 +1,6 @@
 #include "Triangle.h"
 
-IntersectResult Tri::intersect(Ray& ray)
+IntersectResult Triangle::intersect(Ray& ray)
 {
 	IntersectResult result;
 	Ray& transformRay = getTransformRay(ray);

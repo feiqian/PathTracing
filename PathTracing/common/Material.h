@@ -1,10 +1,10 @@
-#ifndef __MATERIAL_ATTRIBUTE_H__
-#define __MATERIAL_ATTRIBUTE_H__
+#ifndef __MATERIAL_H__
+#define __MATERIAL_H__
 #include "VMath.h"
 
-struct MaterialAttribute
+struct Material
 {
-	MaterialAttribute():emission(Color3::NONE){};
+	Material():emission(Color3::NONE){};
 	Color3 color;
 	Color3 emission;
 	double roughness;

@@ -3,7 +3,7 @@
 Color3 PointLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 {
 	Color3 rgb;
-	MaterialAttribute& intersectAttr = result.primitive->attr;
+	Material& intersectAttr = result.primitive->attr;
 	Vec3&r = origin - result.point;
 	double rr = Length(r);
 

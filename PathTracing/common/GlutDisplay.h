@@ -7,7 +7,7 @@ class GlutDisplay
 {
 public:
 	static void setRayTracer(RayTracer* rayTracer);
-	static void render(int argc,char *argv[]);
+	static void render();
 private:
 	static void _render();
 	static void reshape(int w, int h);
