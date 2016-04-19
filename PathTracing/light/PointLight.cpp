@@ -25,9 +25,9 @@ Color3 PointLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 			Vec3 v = ray.direction.flip();
 			Vec3 h = Normalize(s+v);
 			double mDotH = Dot(h,result.normal);
-			if(mDotH>0.0) rgb+= pow(mDotH,intersectAttr.roughness)*intersectAttr.ks
+			if(mDotH>0.0) rgb+= pow(mDotH,intersectAttr.shiness)*intersectAttr.ks
 				*attr.emission*intense
-				*(intersectAttr.roughness+1)/(2*PI);
+				*(intersectAttr.shiness+1)/(2*PI);
 		}
 	}
 	return rgb;

@@ -95,14 +95,14 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 	else 
 	{
 		Material& attr = result.primitive->attr;
-		if(attr.emission!=Color3::NONE) 
-			return attr.emission;
-		else
-		{
-			Vec3 reflection = attr.kd+attr.ks+attr.kt;
-			Ray& newRay = mcSelect(ray,result);
+		Vec3 reflection = attr.kd+attr.ks+attr.kt;
 
-			Color3& indirectIllumination= trace(newRay,++currDepth,reflection*weight);
+		Color3 indirectIllumination;
+		Ray& newRay = mcSelect(ray,result);
+
+		if(newRay.souce != SOURCE::NONE)
+		{
+			indirectIllumination = trace(newRay,++currDepth,reflection*weight);
 
 			switch(newRay.souce)
 			{
@@ -113,23 +113,29 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 				indirectIllumination = attr.ks*indirectIllumination*Dot(newRay.direction,result.normal);
 				break;
 			case SOURCE::TRANSMISSON:
+				//TODO
 				break;
 			}
-
-			Color3& directIllumination= scene.directIllumination(result,ray);
-			return directIllumination + indirectIllumination;
 		}
+
+		Color3& directIllumination= scene.directIllumination(result,ray);
+
+		return attr.emission + directIllumination + indirectIllumination + attr.ka;
 	}
 }
 
 Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result)
 {
 	Ray newRay;
+	newRay.souce = SOURCE::NONE;
 	Material& attr = result.primitive->attr;
+
 	double num[3];
 	num[0]= Dot(attr.kd,Vec3(1,1,1));
 	num[1]= Dot(attr.ks,Vec3(1,1,1))+ num[0];
 	num[2]= Dot(attr.kt,Vec3(1,1,1))+ num[1];
+
+	if(num[2]<=0) return newRay;
 
 	double randNum = (double)rand()/RAND_MAX * num[2];
 	if(randNum<num[0]) 
@@ -140,13 +146,26 @@ Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result)
 	else if(randNum<num[1])
 	{
 		Vec3 prefectReflectDirection = Reflect(ray.direction,result.normal);
-		newRay.direction = importanceSampleUpperHemisphere(prefectReflectDirection,result.primitive->attr.roughness);
+		newRay.direction = importanceSampleUpperHemisphere(prefectReflectDirection,result.primitive->attr.shiness);
 		newRay.souce = SOURCE::SPECULA_REFLECT;
 	}
 	else
 	{
-		//TODO
+		double cosAngle = Dot(ray.direction,result.normal);
+		double n;
 		newRay.souce = SOURCE::TRANSMISSON;
+
+		if(cosAngle>0) 
+		{
+			n = result.primitive->attr.refractiveIndex;
+			if(!Refract(ray.direction,-result.normal,n,newRay.direction)) newRay.souce = SOURCE::NONE;
+		}
+		else
+		{
+			n = 1.0/result.primitive->attr.refractiveIndex;
+			if(!Refract(ray.direction,result.normal,n,newRay.direction)) newRay.souce = SOURCE::NONE;
+		}
+	
 	}
 
 	newRay.origin = result.point;
@@ -176,7 +195,7 @@ Vec3 RayTracer::importanceSampleUpperHemisphere(Vec3& up, double n)
 	return Normalize(mat4*sample);
 }
 
-void RayTracer::run(const char* obj_file)
+void RayTracer::run(string obj_file)
 {
 	if(Parser::parse(obj_file,&scene))
 	{

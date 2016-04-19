@@ -4,7 +4,8 @@
 
 struct Triangle : Plane
 {
-	Triangle(Point3 origin=Point3(0,0,0),Vec3 dx = Vec3(1,0,0),Vec3 dy = Vec3(0,1,0)):Plane(origin,dx,dy){}
+	Triangle(Point3 pt1,Point3 pt2,Point3 pt3):Plane(pt1,Normalize(pt2-pt1),Normalize(pt3-pt1)){}
+
 	IntersectResult intersect(Ray& ray);
 };
 

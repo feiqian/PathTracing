@@ -82,7 +82,9 @@ Color3 Scene::directIllumination(IntersectResult& result,Ray& ray)
 	//TODO 没有考虑光源之间的相互遮挡
 	for(std::vector<IPrimitive*>::iterator it = primitives.begin();it!=primitives.end();++it)
 	{
-		if((*it)->attr.emission==Color3::NONE) continue;
+		ILight* light = NULL;
+		light = dynamic_cast<ILight*>(*it);
+		if(light == NULL) continue;
 		color += (dynamic_cast<ILight*>(*it))->render(result,ray,this);
 	}
 	return color;

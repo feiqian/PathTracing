@@ -4,9 +4,11 @@
 #include <math.h>
 const double EPS = 1e-5;
 
-class  Vec3;
+class Vec2;
+class Vec3;
 typedef Vec3 Color3;
 typedef Vec3 Point3;
+typedef Vec2 Point2;
 static const double PI = acos(-1.0);
 
 inline bool DoubleEquals(double a, double b, double eps = EPS)
@@ -333,14 +335,14 @@ inline Vec3 Reflect(const Vec3 &i, const Vec3 &n)
 {
 	return i - 2.0f * Dot(n, i) * n;
 }
-inline Vec3 Refract(const Vec3 &i, const Vec3 &n, double eta)
+inline bool Refract(const Vec3 &i, const Vec3 &n, double eta,Vec3& refractDirection)
 {
-	Vec3 r;
 	double ndoti = Dot(n, i), k = 1.0f - eta * eta * (1.0f - ndoti * ndoti);
 	if (k >= 0.0f) {
-		r = eta * i - n * (eta * ndoti + sqrt(k));
+		refractDirection = eta * i - n * (eta * ndoti + sqrt(k));
+		return true;
 	}
-	return r;
+	else return false;
 }
 inline Vec3 Limit(const Vec3& src, double bottom, double top)
 {

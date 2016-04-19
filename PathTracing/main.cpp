@@ -27,7 +27,7 @@ int main(int argc,char *argv[])
 
 		string objFile =  objDirectory+"/"+files[id];
 		RayTracer* rayTracer = new RayTracer;
-		rayTracer->run(objFile.c_str());
+		rayTracer->run(objFile);
 	}
 	return 0;
 }

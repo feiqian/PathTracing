@@ -1,5 +1,6 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
+#include <string>
 #include "../raytracer/Scene.h"
 #include "../primitive/IPrimitive.h"
 #include "../primitive/Sphere.h"
@@ -9,7 +10,7 @@
 
 struct Parser
 {
-	static bool parse(const char* fileName,Scene* scene);
+	static bool parse(std::string fileName,Scene* scene);
 };
 
 

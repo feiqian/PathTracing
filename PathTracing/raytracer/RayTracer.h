@@ -1,16 +1,16 @@
 #ifndef __RAYTRACER_H__
 #define __RAYTRACER_H__
-#include <thread>
-#include <mutex>
+#include <string>
 #include "Scene.h"
 #include "Ray.h"
+using namespace std;
 
 class RayTracer
 {
 public:
 	RayTracer();
 	~RayTracer();
-	void run(const char* obj_file);
+	void run(string obj_file);
 	Color3** render();
 	Scene* getScene();
 
