@@ -5,14 +5,12 @@
 bool Parser::parse(std::string fileName,Scene* scene)
 {
 	Camera* camera = new Camera;
-	camera->setAspect(scene->getWidth()/scene->getHeight());
 	scene->camera = camera;
 
 	if(fileName.find(".obj")!=-1)
 	{
 		Mesh* mesh = NULL;
-		if(ObjParser::parse(fileName,mesh)) 
-			scene->primitives.push_back(mesh);
+		if(ObjParser::parse(fileName,mesh)) scene->primitives.push_back(mesh);
 		else return false;
 	}
 	else
@@ -23,8 +21,7 @@ bool Parser::parse(std::string fileName,Scene* scene)
 
 		IPrimitive* sphere = new Sphere(Point3(2,0,-5),1);
 		Material attr;
-		attr.color = Color3(1,0,0);
-		attr.ka = Vec3(0.19,0.07,0.02);
+		attr.ka = Vec3(1,0,0);
 		attr.kd = Vec3(0.70,0.27,0.08);
 		attr.ks = Vec3(0.26,0.18,0.06);
 		attr.shiness = 12.8;
@@ -36,8 +33,7 @@ bool Parser::parse(std::string fileName,Scene* scene)
 		cube->rotate(-20,Vec3(1,0,0));
 		cube->translate(-1,0,-5);
 		Material attr2;
-		attr2.color = Color3(0,0,1);
-		attr2.ka = Vec3(0.19,0.19,0.19);
+		attr2.ka = Vec3(0,0,1);
 		attr2.kd = Vec3(0.41,0.1,0.41);
 		attr2.ks = Vec3(0.41,0.41,0.41);
 		attr2.shiness = 51.2;
@@ -52,8 +48,7 @@ bool Parser::parse(std::string fileName,Scene* scene)
 		Plane* plane6 = new Plane(Point3(-5,-5,10),Vec3(0,1000,0),Vec3(1000,0,0));//front
 
 		Material attr3;
-		attr3.color = Color3(1,1,1);
-		attr3.ka = Vec3(0, 0, 0);
+		attr3.ka = Vec3(1, 1, 1);
 		attr3.kd = Vec3(0.5, 0.5, 0.5);
 		attr3.ks = Vec3(0,0,0);
 		attr3.shiness = 89.6;

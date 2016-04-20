@@ -17,14 +17,16 @@ bool parseMaterial(string mtlPath,map<string,Material>& mp)
 	while(file>>type)
 	{
 		if(type=="newmtl")
-		{
-			file>>materialName;
+		{				
 			if(flag) 
 			{
 				mp.insert(make_pair(materialName,attr));
 				attr = Material();
 			}
 			else flag = true;
+
+			file>>materialName;
+			attr.name = materialName;
 		}
 		else if(type=="Kd")
 		{
@@ -42,9 +44,13 @@ bool parseMaterial(string mtlPath,map<string,Material>& mp)
 		{
 			file>>attr.emission.r>>attr.emission.g>>attr.emission.b;
 		}
-		else if(type=="Ni")
+		else if(type=="Ns")
 		{
 			file>>attr.shiness;
+		}
+		else if(type=="Ni")
+		{
+			file>>attr.refractiveIndex;
 		}
 		else if(type=="Tf")
 		{
@@ -68,9 +74,9 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 	Point3 pt;
 	Point3 vt;
 	Vec3 vn;
-	int vertI[20];
-	int normI[20];
-	int texI[20];
+	int vertI[3];
+	int normI[3];
+	int texI[3];
 
 	map<string,Material> materialMap;
 	string materialName;
@@ -128,9 +134,14 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 				++index;
 				if(index>=3)
 				{
-					MeshTriangle tri(mesh,vertI+index-3,normI+index-3,texI+index-3);
+					MeshTriangle tri(mesh,vertI,normI,texI);
 					tri.attr = attr;
 					mesh->triangleList.push_back(tri);
+
+					vertI[1]=vertI[2];
+					normI[1]=normI[2];
+					texI[1]=texI[2];
+					index = 2;
 				}
 			}
 		}
@@ -161,6 +172,9 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 			parseMaterial(mtlPath,materialMap);
 		}
 	}
+
+
+
 
 	file.close();
 	return true;

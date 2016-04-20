@@ -23,7 +23,6 @@
     <ClCompile Include="primitive\Mesh.cpp" />
     <ClCompile Include="primitive\Plane.cpp" />
     <ClCompile Include="primitive\Sphere.cpp" />
-    <ClCompile Include="primitive\Triangle.cpp" />
     <ClCompile Include="raytracer\Camera.cpp" />
     <ClCompile Include="raytracer\RayTracer.cpp" />
     <ClCompile Include="raytracer\Scene.cpp" />
@@ -45,7 +44,6 @@
     <ClInclude Include="primitive\Mesh.h" />
     <ClInclude Include="primitive\Plane.h" />
     <ClInclude Include="primitive\Sphere.h" />
-    <ClInclude Include="primitive\Triangle.h" />
     <ClInclude Include="raytracer\Camera.h" />
     <ClInclude Include="raytracer\Ray.h" />
     <ClInclude Include="raytracer\RayTracer.h" />

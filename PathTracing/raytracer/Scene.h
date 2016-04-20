@@ -20,6 +20,7 @@ public:
 	void setSize(int width,int height);
 	int getWidth();
 	int getHeight();
+	void focusModel();
 
 	vector<IPrimitive*> primitives;
 	Camera* camera;

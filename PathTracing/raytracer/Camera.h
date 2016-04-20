@@ -15,15 +15,15 @@ public:
 	void perspective(double fov, double aspect, double near, double far);
 	void rotate(double angle, const Vec3& axis);
 
+	double width,height;//视口宽高
+	double nearPlane,farPlane;
 private:
 	Point3 origin;
 	Point3 center;
 
 	double fov;//垂直方向的 filed of view
-	double nearPlane,farPlane;
 	double aspect;
 
-	double width,height;//视口宽高
 	double rotateX,rotateY;
 	Vec3 front,up,right;
 };

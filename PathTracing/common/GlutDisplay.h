@@ -20,7 +20,6 @@ private:
 	static bool bMouseDown;
 	static int mouseX;
 	static int mouseY;
-	static Vec3** rgbArr;
 };
 
 #endif

@@ -1,5 +1,6 @@
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
+#include <string>
 #include "VMath.h"
 
 //http://paulbourke.net/dataformats/mtl/
@@ -8,7 +9,7 @@ struct Material
 {
 	Material():shiness(100),refractiveIndex(1.0){};
 
-	Color3 color;
+	std::string name;
 	Color3 emission;
 
 	double shiness;//π‚‘Û∂»Ns

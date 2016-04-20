@@ -87,7 +87,7 @@ Color3** RayTracer::render()
  
 Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 {
-	if(currDepth>maxRecursiveDepth || Length2(weight)<EPS_LOOSE) 
+	if(currDepth>=maxRecursiveDepth || Length2(weight)<EPS_LOOSE) 
 		return Color3::BLACK;
 
 	IntersectResult& result = scene.intersect(ray);
@@ -102,7 +102,7 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 
 		if(newRay.souce != SOURCE::NONE)
 		{
-			indirectIllumination = trace(newRay,++currDepth,reflection*weight);
+			indirectIllumination = trace(newRay,currDepth+1,reflection*weight);
 
 			switch(newRay.souce)
 			{
@@ -120,7 +120,7 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 
 		Color3& directIllumination= scene.directIllumination(result,ray);
 
-		return attr.emission + directIllumination + indirectIllumination + attr.ka;
+		return attr.emission + directIllumination + indirectIllumination;
 	}
 }
 
@@ -199,6 +199,7 @@ void RayTracer::run(string obj_file)
 {
 	if(Parser::parse(obj_file,&scene))
 	{
+		scene.focusModel();
 		GlutDisplay::setRayTracer(this);
 		GlutDisplay::render();
 	}

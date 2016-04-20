@@ -3,7 +3,7 @@
 Camera::Camera()
 {
 	lookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0);
-	perspective(90, 1.0, 0.1, 200.0);
+	perspective(90, 1.0, 0.01, 2000.0);
 }
 
 void Camera::lookAt(double ex, double ey, double ez, double lx, double ly, double lz, double upx, double upy, double upz)
@@ -27,7 +27,6 @@ void Camera::perspective(double fov, double aspect, double near, double far)
 
 void Camera::setAspect(double aspect)
 {
-	if(this->aspect == aspect) return;
 	this->aspect = aspect;
 	height = 2*nearPlane*tan(fov/2*PI/180);
 	width = height*aspect;
