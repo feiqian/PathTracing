@@ -16,7 +16,7 @@ public:
 
 private:
 	Color3 trace(Ray& ray,int currDepth = 0,Vec3 weight = Vec3(1,1,1));
-	Ray mcSelect(Ray& ray,IntersectResult& result);
+	Ray mcSelect(Ray& ray,IntersectResult& result,double& fresnelIndex);
 	Vec3 importanceSampleUpperHemisphere(Vec3& upVector, double n=-1);
 
 	//TODO blockSize

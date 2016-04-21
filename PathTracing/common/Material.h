@@ -7,7 +7,7 @@
 
 struct Material
 {
-	Material():shiness(100),refractiveIndex(1.0){};
+	Material():shiness(60),refractiveIndex(1.0),bUseFresnel(false){};
 
 	std::string name;
 	Color3 emission;
@@ -18,8 +18,9 @@ struct Material
 	Vec3 ka;//环境光系数
 	Vec3 kd;//漫反射系数
 	Vec3 ks;//镜面反射系数
-	Vec3 kt;//透射系数
 	Vec3 tf;//transmission filter
+
+	bool bUseFresnel;
 };
 
 #endif

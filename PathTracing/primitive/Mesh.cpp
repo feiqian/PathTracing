@@ -20,6 +20,7 @@ void MeshTriangle::resize()
 
 Color3 MeshTriangle::render(IntersectResult& result,Ray& ray,Scene* scene)
 {
+	//TODO 光源强度没有考虑距离因素
 	if(attr.emission==Color3::BLACK ||result.primitive==this) return Color3::BLACK;
 
 	Color3 rgb;

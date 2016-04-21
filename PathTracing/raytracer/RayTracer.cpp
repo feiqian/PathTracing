@@ -6,13 +6,24 @@
 
 const double EPS_LOOSE = 1e-8;
 
+double getFresnelIndex(double ni,double nt,double cosTheta)
+{
+	//schlick的fresnel反射系数近视
+	double f0 = (ni-nt)/(ni+nt); 
+	f0*=f0;
+	double schlick = f0 + (1-f0)* pow(1.0-cosTheta,5);
+
+	return schlick;
+}
+
+
 RayTracer::RayTracer()
 {
-	mcSampleNum = 1;
+	mcSampleNum = 0;
 	pxSampleNum = 0;
 	threadNum = 1;
 	blockSize = 1;
-	maxRecursiveDepth = 2;
+	maxRecursiveDepth = 5;
 }
 
 RayTracer::~RayTracer()
@@ -95,10 +106,11 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 	else 
 	{
 		Material& attr = result.primitive->attr;
-		Vec3 reflection = attr.kd+attr.ks+attr.kt;
+		Vec3 reflection = attr.kd+attr.ks;
 
 		Color3 indirectIllumination;
-		Ray& newRay = mcSelect(ray,result);
+		double fresnelIndex;
+		Ray& newRay = mcSelect(ray,result,fresnelIndex);
 
 		if(newRay.souce != SOURCE::NONE)
 		{
@@ -110,10 +122,10 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 				indirectIllumination = attr.kd*indirectIllumination;
 				break;
 			case SOURCE::SPECULA_REFLECT:
-				indirectIllumination = attr.ks*indirectIllumination*Dot(newRay.direction,result.normal);
+				indirectIllumination = attr.ks*fresnelIndex*indirectIllumination*Dot(newRay.direction,result.normal);
 				break;
 			case SOURCE::TRANSMISSON:
-				//TODO
+				indirectIllumination = attr.ks*(1.0-fresnelIndex)*indirectIllumination;
 				break;
 			}
 		}
@@ -124,48 +136,60 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 	}
 }
 
-Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result)
+Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& fresnelIndex)
 {
 	Ray newRay;
 	newRay.souce = SOURCE::NONE;
 	Material& attr = result.primitive->attr;
+	fresnelIndex = 1.0;
 
-	double num[3];
+	double num[2];
 	num[0]= Dot(attr.kd,Vec3(1,1,1));
 	num[1]= Dot(attr.ks,Vec3(1,1,1))+ num[0];
-	num[2]= Dot(attr.kt,Vec3(1,1,1))+ num[1];
 
-	if(num[2]<=0) return newRay;
+	if(num[1]<=0) return newRay;
 
-	double randNum = (double)rand()/RAND_MAX * num[2];
+	double randNum = (double)rand()/RAND_MAX * num[1];
 	if(randNum<num[0]) 
 	{
 		newRay.direction = importanceSampleUpperHemisphere(result.normal);
 		newRay.souce = SOURCE::DIFFUSE_REFLECT;
 	}
-	else if(randNum<num[1])
-	{
-		Vec3 prefectReflectDirection = Reflect(ray.direction,result.normal);
-		newRay.direction = importanceSampleUpperHemisphere(prefectReflectDirection,result.primitive->attr.shiness);
-		newRay.souce = SOURCE::SPECULA_REFLECT;
-	}
 	else
 	{
-		double cosAngle = Dot(ray.direction,result.normal);
-		double n;
-		newRay.souce = SOURCE::TRANSMISSON;
-
-		if(cosAngle>0) 
+		if(attr.bUseFresnel&&attr.tf!=0.0)
 		{
-			n = result.primitive->attr.refractiveIndex;
-			if(!Refract(ray.direction,-result.normal,n,newRay.direction)) newRay.souce = SOURCE::NONE;
+			double ni,nt;
+			double bInto = Dot(ray.direction,result.normal)>0?false:true;
+
+			if(!bInto) 
+			{
+				ni = attr.refractiveIndex;
+				nt = 1.0;
+			}
+			else
+			{
+				ni= 1.0;
+				nt = attr.refractiveIndex;
+			}
+
+			if(Refract(ray.direction,bInto?result.normal:-result.normal,ni/nt,newRay.direction)) 
+			{
+				double cosTheta = bInto?Dot(-ray.direction,result.normal):Dot(newRay.direction,result.normal);
+				fresnelIndex = getFresnelIndex(ni,nt,cosTheta);
+			}
+		}
+
+		if(randNum<Dot(attr.ks*fresnelIndex,Vec3(1,1,1))+ num[0])
+		{
+			Vec3 prefectReflectDirection = Reflect(ray.direction,result.normal);
+			newRay.direction = importanceSampleUpperHemisphere(prefectReflectDirection,attr.shiness);
+			newRay.souce = SOURCE::SPECULA_REFLECT;
 		}
 		else
 		{
-			n = 1.0/result.primitive->attr.refractiveIndex;
-			if(!Refract(ray.direction,result.normal,n,newRay.direction)) newRay.souce = SOURCE::NONE;
+			newRay.souce = SOURCE::TRANSMISSON;
 		}
-	
 	}
 
 	newRay.origin = result.point;

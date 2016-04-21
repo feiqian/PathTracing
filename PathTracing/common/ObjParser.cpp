@@ -13,6 +13,7 @@ bool parseMaterial(string mtlPath,map<string,Material>& mp)
 	string materialName;
 	Material attr;
 	bool flag = false;
+	int illuminationModel;
 
 	while(file>>type)
 	{
@@ -55,6 +56,11 @@ bool parseMaterial(string mtlPath,map<string,Material>& mp)
 		else if(type=="Tf")
 		{
 			file>>attr.tf.x>>attr.tf.y>>attr.tf.z;
+		}
+		else if(type=="illum")
+		{
+			file>>illuminationModel;
+			if(illuminationModel==5||illuminationModel==7) attr.bUseFresnel = true;
 		}
 	}
 
