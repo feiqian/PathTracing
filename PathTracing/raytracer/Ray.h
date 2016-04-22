@@ -18,7 +18,6 @@ struct Ray
 	Point3 origin;
 	Vec3 direction;
 	Color3 color;
-	Vec3 inverseDirection;
 	SOURCE source;
 
 	double tMin;

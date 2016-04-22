@@ -3,6 +3,7 @@
 #include "../common/Parser.h"
 #include "../common/GlutDisplay.h"
 #include "../common/Utils.h"
+#include "../common/Timer.h"
 
 const double EPS_LOOSE = 1e-8;
 
@@ -37,6 +38,7 @@ Scene* RayTracer::getScene()
 
 Color3** RayTracer::render()
 {
+	TotalTimer renderTimer("rendering");
 	int width = scene.getWidth(),height = scene.getHeight();
 	double progress = 0,increment = 100.0/(width*height);
 

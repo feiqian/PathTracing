@@ -14,6 +14,7 @@
     <ClCompile Include="common\GlutDisplay.cpp" />
     <ClCompile Include="common\ObjParser.cpp" />
     <ClCompile Include="common\Parser.cpp" />
+    <ClCompile Include="common\Timer.cpp" />
     <ClCompile Include="common\Utils.cpp" />
     <ClCompile Include="light\PointLight.cpp" />
     <ClCompile Include="main.cpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="common\Material.h" />
     <ClInclude Include="common\ObjParser.h" />
     <ClInclude Include="common\Parser.h" />
+    <ClInclude Include="common\Timer.h" />
     <ClInclude Include="common\Utils.h" />
     <ClInclude Include="common\VMath.h" />
     <ClInclude Include="common\IntersectResult.h" />
