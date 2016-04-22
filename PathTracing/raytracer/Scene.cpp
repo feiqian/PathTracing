@@ -161,7 +161,9 @@ void Scene::focusModel()
 
 		mesh->resizeVertices.resize(mesh->vertices.size());
 
-		for(int j=0,len2 = mesh->vertices.size();j<len2;++j)
+		int len2 = mesh->vertices.size();
+		#pragma omp parallel
+		for(int j=0;j<len2;++j)
 		{
 			const Point3& vertex = mesh->vertices[j];
 

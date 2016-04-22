@@ -5,6 +5,7 @@
 #include "../common/Utils.h"
 #include "../common/Timer.h"
 
+#define NUM_THREADS 20
 const double EPS_LOOSE = 1e-8;
 
 double getFresnelIndex(double ni,double nt,double cosTheta)
@@ -21,7 +22,6 @@ RayTracer::RayTracer()
 {
 	mcSampleNum = 0;
 	pxSampleNum = 0;
-	threadNum = 1;
 	blockSize = 1;
 	maxRecursiveDepth = 5;
 }
@@ -42,6 +42,8 @@ Color3** RayTracer::render()
 	int width = scene.getWidth(),height = scene.getHeight();
 	double progress = 0,increment = 100.0/(width*height);
 
+	//只在Release模式下开启了OMP支持
+	#pragma omp parallel for num_threads(NUM_THREADS)
 	for(int y=0;y<height;++y)
 	{
 		for(int x=0;x<width;++x)
@@ -90,7 +92,9 @@ Color3** RayTracer::render()
 			scene.color[y][x] = total1/i;
 			delete [] rays;
 
-			Utils::PrintProgress(progress,increment);
+			#ifdef _DEBUG
+				Utils::PrintProgress(progress,increment);
+			#endif // DEBUG
 		}
 	}
 

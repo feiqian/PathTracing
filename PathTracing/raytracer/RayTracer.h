@@ -23,7 +23,6 @@ private:
 	int blockSize;//像素块大小
 	int pxSampleNum;//每个像素的采样数目
 	int mcSampleNum;//蒙特卡洛采样数目
-	int threadNum;//渲染线程数目
 	int maxRecursiveDepth;//光线最大递归深度
 
 	Scene scene;
