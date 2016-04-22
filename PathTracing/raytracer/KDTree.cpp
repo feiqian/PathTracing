@@ -106,17 +106,30 @@ bool KdTree::intersect(Ray& ray,IntersectResult& result)
 
 	bool hit1 = false, hit2 = false;
 
-	if(low!=NULL)
+	if(ray.direction.num[splitAxis]>=0)
 	{
-		IntersectResult temp;
-		hit1 = low->intersect(ray,temp);
-		if(hit1&&temp.distance<result.distance) result = temp;
+		if(low!=NULL)
+		{
+			hit1 = low->intersect(ray,result);
+			ray.setBounds(ray.getLowerBound(),result.distance);
+		}
+		if(high!=NULL) 
+		{
+			hit2 = high->intersect(ray,result);
+		}
 	}
-	if(high!=NULL)
+	else
 	{
-		IntersectResult temp;
-		hit2 = high->intersect(ray,temp);
-		if(hit2&&temp.distance<result.distance) result = temp;
+		if(high!=NULL) 
+		{
+			hit1 = high->intersect(ray,result);
+			ray.setBounds(ray.getLowerBound(),result.distance);
+		}
+
+		if(low!=NULL)
+		{
+			hit2 = low->intersect(ray,result);
+		}
 	}
 
 	return hit1||hit2;

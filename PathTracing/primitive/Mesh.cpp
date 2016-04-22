@@ -98,7 +98,7 @@ bool MeshTriangle::intersect(Ray& ray,IntersectResult& result)
 
 	double bestTime = Dot(normal,v)/Dot(normal,ray.direction);
 
-	if(DoubleCompare(s,0)>=0&&DoubleCompare(t,0)>=0&&DoubleCompare(s+t,1)<=0&&DoubleCompare(bestTime,0)>0)
+	if(DoubleCompare(s,0)>=0&&DoubleCompare(t,0)>=0&&DoubleCompare(s+t,1)<=0&&ray.isWithinBounds(bestTime))
 	{
 		result.point = ray.getPoint(bestTime);
 		result.distance = bestTime;
@@ -132,8 +132,6 @@ AABB Mesh::getAABB()
 
 void Mesh::init()
 {
-	lights.clear();
-
 	for(int i=0,len = triangleList.size();i<len;++i) 
 	{
 		((MeshTriangle*)triangleList[i])->init();

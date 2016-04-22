@@ -81,7 +81,7 @@ bool Cube::intersect(Ray& ray,IntersectResult& result)
 		}
 	}
 	
-	if(DoubleCompare(tIn,0)>0)
+	if(ray.isWithinBounds(tIn))
 	{
 		result.point = ray.getPoint(tIn);
 		result.normal = getTransformNormal(inNormal);

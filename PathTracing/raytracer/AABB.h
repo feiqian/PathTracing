@@ -14,8 +14,8 @@ public:
 	bool intersect(Ray& ray,IntersectResult& result);
 	AABB getAABB(){return *this;}
 
-	double minCoordinate(int axis){return low.num[axis];}
-	double maxCoordinate(int axis){return high.num[axis];}
+	inline double minCoordinate(int axis){return low.num[axis];}
+	inline double maxCoordinate(int axis){return high.num[axis];}
 
 	static AABB combine(const AABB& box1,const AABB& box2);
 private:

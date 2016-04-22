@@ -22,8 +22,8 @@ public:
 	Color3 directIllumination(IntersectResult& result,Ray& ray);
 	void setSize(int width,int height);
 
-	int getWidth();
-	int getHeight();
+	inline int getWidth(){return width;}
+	inline int getHeight(){return height;}
 
 	vector<IPrimitive*> primitives;
 	Camera* camera;

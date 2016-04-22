@@ -21,15 +21,17 @@ AABB AABB::combine(const AABB& box1,const AABB& box2)
 	return AABB(pt1,pt2);
 }
 
-bool AABB::intersect(Ray& ray,IntersectResult& resul)
+bool AABB::intersect(Ray& ray,IntersectResult& result)
 {
-	//²Î¿¼£ºhttp://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
-	float t1 = (low.x - ray.origin.x)*ray.inverseDirection.x;
-	float t2 = (high.x - ray.origin.x)*ray.inverseDirection.x;
-	float t3 = (low.y - ray.origin.y)*ray.inverseDirection.y;
-	float t4 = (high.y - ray.origin.y)*ray.inverseDirection.y;
-	float t5 = (low.z - ray.origin.z)*ray.inverseDirection.z;
-	float t6 = (high.z - ray.origin.z)*ray.inverseDirection.z;
+	////²Î¿¼£ºhttp://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
+	Vec3& inverseDirection = ray.getInverseDirection();
+
+	float t1 = (low.x - ray.origin.x)*inverseDirection.x;
+	float t2 = (high.x - ray.origin.x)*inverseDirection.x;
+	float t3 = (low.y - ray.origin.y)*inverseDirection.y;
+	float t4 = (high.y - ray.origin.y)*inverseDirection.y;
+	float t5 = (low.z - ray.origin.z)*inverseDirection.z;
+	float t6 = (high.z - ray.origin.z)*inverseDirection.z;
 
 	float tmin = max(max(min(t1, t2), min(t3, t4)), min(t5, t6));
 	float tmax = min(min(max(t1, t2), max(t3, t4)), max(t5, t6));
@@ -39,5 +41,5 @@ bool AABB::intersect(Ray& ray,IntersectResult& resul)
 	// if tmin > tmax, ray doesn't intersect AABB
 	if (tmin > tmax) return false;
 
-	return true;
+	return ( tmin < ray.getUpperBound() && tmax > ray.getLowerBound());
 }

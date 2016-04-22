@@ -111,11 +111,11 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 		double fresnelIndex;
 		Ray& newRay = mcSelect(ray,result,fresnelIndex);
 
-		if(newRay.souce != SOURCE::NONE)
+		if(newRay.source != SOURCE::NONE)
 		{
 			indirectIllumination = trace(newRay,currDepth+1,reflection*weight);
 
-			switch(newRay.souce)
+			switch(newRay.source)
 			{
 			case SOURCE::DIFFUSE_REFLECT:
 				indirectIllumination = attr.kd*indirectIllumination;
@@ -138,7 +138,6 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& fresnelIndex)
 {
 	Ray newRay;
-	newRay.souce = SOURCE::NONE;
 	Material& attr = result.primitive->attr;
 	fresnelIndex = 1.0;
 
@@ -152,7 +151,7 @@ Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& fresnelIndex)
 	if(randNum<num[0]) 
 	{
 		newRay.direction = importanceSampleUpperHemisphere(result.normal);
-		newRay.souce = SOURCE::DIFFUSE_REFLECT;
+		newRay.source = SOURCE::DIFFUSE_REFLECT;
 	}
 	else
 	{
@@ -183,11 +182,11 @@ Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& fresnelIndex)
 		{
 			Vec3 prefectReflectDirection = Reflect(ray.direction,result.normal);
 			newRay.direction = importanceSampleUpperHemisphere(prefectReflectDirection,attr.shiness);
-			newRay.souce = SOURCE::SPECULA_REFLECT;
+			newRay.source = SOURCE::SPECULA_REFLECT;
 		}
 		else
 		{
-			newRay.souce = SOURCE::TRANSMISSON;
+			newRay.source = SOURCE::TRANSMISSON;
 		}
 	}
 

@@ -36,9 +36,6 @@ void Scene::setSize(int width,int height)
 	this->height = height;
 }
 
-int Scene::getWidth(){return width;}
-int Scene::getHeight(){return height;}
-
 bool Scene::intersect(Ray& ray,IntersectResult& result)
 {
 	//bool hit = false;

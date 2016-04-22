@@ -20,8 +20,8 @@ bool Sphere::intersect(Ray& ray,IntersectResult& result)
 		delta = sqrt(delta);
 		double time = (-B - delta)/A;
 
-		//排除光线起点在球内的情况
-		if(DoubleCompare(time,0)>0)
+		//TODO 注意这里排除了光线起点在球内的情况
+		if(ray.isWithinBounds(time))
 		{
 			result.point = ray.getPoint(time);
 			result.distance = time;
