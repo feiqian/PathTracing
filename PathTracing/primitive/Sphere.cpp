@@ -6,9 +6,8 @@ Sphere::Sphere(Point3 origin,double radius):origin(Point3(0,0,0)),radius(1.0)
 	if(origin!=0) translate(origin.x,origin.y,origin.z);
 }
 
-IntersectResult Sphere::intersect(Ray& ray)
+bool Sphere::intersect(Ray& ray,IntersectResult& result)
 {
-	IntersectResult result;
 	Ray& transformRay = getTransformRay(ray);
 
 	double A = Length2(transformRay.direction);
@@ -28,7 +27,13 @@ IntersectResult Sphere::intersect(Ray& ray)
 			result.distance = time;
 			result.normal = getTransformNormal(transformRay.getPoint(time));
 			result.primitive = this;
+			return true;
 		}
 	}
-	return result;
+	return false;
+}
+
+AABB Sphere::getAABB()
+{
+	return AABB(origin-radius,origin+radius);
 }

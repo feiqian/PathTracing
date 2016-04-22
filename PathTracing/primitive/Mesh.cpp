@@ -9,13 +9,29 @@ MeshTriangle::MeshTriangle(Mesh* mesh,int vertI[], int normI[], int texI[])
 	lightSamples = 1;
 }
 
-void MeshTriangle::resize()
+void MeshTriangle::init()
 {
 	Point3& pt1 =mesh->resizeVertices[vertI[0]],&pt2 = mesh->resizeVertices[vertI[1]],&pt3 = mesh->resizeVertices[vertI[2]];
 	origin = pt1;
 	dx = pt2-pt1;
 	dy = pt3-pt1;
 	normal = Normalize(Cross(dx,dy));
+}
+
+AABB MeshTriangle::getAABB()
+{
+	Point3 low,high;
+	Point3& pt1 =mesh->resizeVertices[vertI[0]],&pt2 = mesh->resizeVertices[vertI[1]],&pt3 = mesh->resizeVertices[vertI[2]];
+
+	low.x = min(pt1.x,min(pt2.x,pt3.x));
+	low.y = min(pt1.y,min(pt2.y,pt3.y));
+	low.z = min(pt1.z,min(pt2.z,pt3.z));
+
+	high.x = max(pt1.x,max(pt2.x,pt3.x));
+	high.y = max(pt1.y,max(pt2.y,pt3.y));
+	high.z = max(pt1.z,max(pt2.z,pt3.z));
+
+	return AABB(low,high);
 }
 
 Color3 MeshTriangle::render(IntersectResult& result,Ray& ray,Scene* scene)
@@ -64,13 +80,11 @@ Color3 MeshTriangle::render(IntersectResult& result,Ray& ray,Scene* scene)
 	return rgb;
 }
 
-IntersectResult MeshTriangle::intersect(Ray& ray)
+bool MeshTriangle::intersect(Ray& ray,IntersectResult& result)
 {
-	IntersectResult result;
-
 	double tmp = Dot(normal,ray.direction);
 
-	if(DoubleEquals(tmp,0)) return result;
+	if(DoubleEquals(tmp,0)) return false;
 
 	bool inside = DoubleCompare(tmp,0)<0?false:true;
 
@@ -90,30 +104,41 @@ IntersectResult MeshTriangle::intersect(Ray& ray)
 		result.distance = bestTime;
 		result.normal = inside?-normal:normal;
 		result.primitive = this;
+		return true;
 	}
 
-	return result;
+	return false;
 }
 
-IntersectResult Mesh::intersect(Ray& ray)
+bool Mesh::intersect(Ray& ray,IntersectResult& result)
 {
-	IntersectResult best;
-	best.distance = 1e20;
-
-	for(int i=0,len=triangleList.size();i<len;++i)
-	{
-		IntersectResult& result = triangleList[i].intersect(ray);
-		if(result.isHit()&&result.distance<best.distance) best = result;
-	}
-	return best;
+	return kdTree.intersect(ray,result);
 }
 
 Color3 Mesh::render(IntersectResult& result,Ray& ray,Scene* scene)
 {
 	Color3 rgb;
-	for(int i=0,len=triangleList.size();i<len;++i)
+	for(int i=0,len=lights.size();i<len;++i)
 	{
-		rgb += triangleList[i].render(result,ray,scene);
+		rgb += ((MeshTriangle*)lights[i])->render(result,ray,scene);
 	}
 	return rgb;
+}
+
+AABB Mesh::getAABB()
+{
+	return kdTree.getAABB();
+}
+
+void Mesh::init()
+{
+	lights.clear();
+
+	for(int i=0,len = triangleList.size();i<len;++i) 
+	{
+		((MeshTriangle*)triangleList[i])->init();
+		if(triangleList[i]->attr.emission!=Color3::BLACK) lights.push_back(triangleList[i]);
+	}
+
+	kdTree.build(triangleList);
 }

@@ -4,6 +4,7 @@
 #include "../common/VMath.h"
 #include "IPrimitive.h"
 #include "../light/ILight.h"
+#include "../raytracer/KdTree.h"
 using namespace std;
 
 class Mesh;
@@ -12,9 +13,10 @@ class MeshTriangle : public IPrimitive,public ILight
 {
 public:
 	MeshTriangle(Mesh* mesh,int vertI[], int normI[], int texI[]);
-	void resize();
+	void init();
 
-	IntersectResult intersect(Ray& ray);
+	bool intersect(Ray& ray,IntersectResult& result);
+	AABB getAABB();
 	Color3 render(IntersectResult& result,Ray& ray,Scene* scene);
 
 	Mesh* mesh;
@@ -31,16 +33,20 @@ private:
 class Mesh : public IPrimitive,public ILight
 {
 public:
-	IntersectResult intersect(Ray& ray);
+	bool intersect(Ray& ray,IntersectResult& result);
+	AABB getAABB();
 	Color3 render(IntersectResult& result,Ray& ray,Scene* scene);
-
-	vector<MeshTriangle> triangleList;
+	void init();
 
 	vector<Point3> vertices;
 	vector<Vec3> normals;
 	vector<Point2> textures;
 
 	vector<Point3> resizeVertices;
+	vector<IPrimitive*> triangleList;
+private:
+	KdTree kdTree;
+	vector<IPrimitive*> lights;
 };
 
 

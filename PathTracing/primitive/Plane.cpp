@@ -6,10 +6,8 @@ Plane::Plane(Point3 origin,Vec3 dx,Vec3 dy)
 	normal = Normalize(Cross(dx,dy));
 }
 
-IntersectResult Plane::intersect(Ray& ray)
+bool Plane::intersect(Ray& ray,IntersectResult& result)
 {
-	IntersectResult result;
-
 	double tmp = Dot(normal,ray.direction);
 
 	if(DoubleCompare(tmp,0)<0)
@@ -30,7 +28,19 @@ IntersectResult Plane::intersect(Ray& ray)
 			result.distance = bestTime;
 			result.normal = normal;
 			result.primitive = this;
+			return true;
 		}
 	}
-	return result;
+	return false;
+}
+
+AABB Plane::getAABB()
+{
+	Vec3& end = origin+dx+dy;
+	return AABB(Vec3(min(origin.x,end.x),
+		min(origin.y,end.y),
+		min(origin.z,end.z)),
+		Vec3(max(origin.x,end.x),
+		max(origin.y,end.y),
+		max(origin.z,end.z)));
 }

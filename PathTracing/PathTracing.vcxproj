@@ -12,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\GlutDisplay.cpp" />
-    <ClCompile Include="common\KDTree.cpp" />
     <ClCompile Include="common\ObjParser.cpp" />
     <ClCompile Include="common\Parser.cpp" />
     <ClCompile Include="common\Utils.cpp" />
@@ -23,14 +22,15 @@
     <ClCompile Include="primitive\Mesh.cpp" />
     <ClCompile Include="primitive\Plane.cpp" />
     <ClCompile Include="primitive\Sphere.cpp" />
+    <ClCompile Include="raytracer\AABB.cpp" />
     <ClCompile Include="raytracer\Camera.cpp" />
+    <ClCompile Include="raytracer\KdTree.cpp" />
     <ClCompile Include="raytracer\RayTracer.cpp" />
     <ClCompile Include="raytracer\Scene.cpp" />
     <ClCompile Include="common\VMath.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\GlutDisplay.h" />
-    <ClInclude Include="common\KDTree.h" />
     <ClInclude Include="common\Material.h" />
     <ClInclude Include="common\ObjParser.h" />
     <ClInclude Include="common\Parser.h" />
@@ -44,7 +44,9 @@
     <ClInclude Include="primitive\Mesh.h" />
     <ClInclude Include="primitive\Plane.h" />
     <ClInclude Include="primitive\Sphere.h" />
+    <ClInclude Include="raytracer\AABB.h" />
     <ClInclude Include="raytracer\Camera.h" />
+    <ClInclude Include="raytracer\KdTree.h" />
     <ClInclude Include="raytracer\Ray.h" />
     <ClInclude Include="raytracer\RayTracer.h" />
     <ClInclude Include="raytracer\Scene.h" />

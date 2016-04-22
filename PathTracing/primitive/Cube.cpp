@@ -7,9 +7,8 @@ Cube::Cube(Point3 origin/* =Vec3(0,0,0) */,double length/* =1.0 */,double width/
 	if(origin!=0) translate(origin.x,origin.y,origin.z);
 }
 
-IntersectResult Cube::intersect(Ray& ray)
+bool Cube::intersect(Ray& ray,IntersectResult& result)
 {
-	IntersectResult result;
 	Ray& transformRay = getTransformRay(ray);
 
 	double tIn = -1000000,tOut = 1000000;
@@ -58,7 +57,7 @@ IntersectResult Cube::intersect(Ray& ray)
 		//光线与平面平行
 		if(DoubleEquals(demon,0.0)) 
 		{
-			if(number<0) return result;
+			if(number<0) return false;
 		}
 		else
 		{
@@ -78,7 +77,7 @@ IntersectResult Cube::intersect(Ray& ray)
 					inNormal = normal;
 				}
 			}
-			if(DoubleCompare(tIn,tOut)>0) return result;
+			if(DoubleCompare(tIn,tOut)>0) return false;
 		}
 	}
 	
@@ -88,6 +87,12 @@ IntersectResult Cube::intersect(Ray& ray)
 		result.normal = getTransformNormal(inNormal);
 		result.distance = tIn;
 		result.primitive = this;
+		return true;
 	}
-	return result;
+	return false;
+}
+
+AABB Cube::getAABB()
+{
+	return AABB(origin,origin+Vec3(length,height,width));
 }

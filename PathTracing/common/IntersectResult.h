@@ -7,8 +7,7 @@
 class IPrimitive;
 struct IntersectResult
 {
-	IntersectResult():primitive(NULL),distance(0.0){};
-	bool isHit(){return this->primitive!=NULL;};
+	IntersectResult():primitive(NULL),distance(DOUBLE_POSITIVE_INFINITY){};
 
 	IPrimitive* primitive;
 	double distance;

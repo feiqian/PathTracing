@@ -7,7 +7,10 @@
 bool parseMaterial(string mtlPath,map<string,Material>& mp)
 {
 	ifstream file(mtlPath);
-	if(!file.is_open()) return false;
+	if(!file.is_open()) {
+		cout<<"mtl file:"+mtlPath+" not found!"<<endl;
+		return false;
+	}
 
 	string type;
 	string materialName;
@@ -74,7 +77,10 @@ bool parseMaterial(string mtlPath,map<string,Material>& mp)
 bool ObjParser::parse(string objPath,Mesh*& mesh)
 {
 	ifstream file(objPath);
-	if(!file.is_open()) return false;
+	if(!file.is_open()) {
+		cout<<"obj file:"+objPath+" not found!"<<endl;
+		return false;
+	}
 
 	string type;
 	Point3 pt;
@@ -88,7 +94,8 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 	string materialName;
 	Material attr;
 	mesh = new Mesh;
-	
+	bool returnValue = true;
+
 	while (file>>type)
 	{
 		if(type=="v")
@@ -140,8 +147,8 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 				++index;
 				if(index>=3)
 				{
-					MeshTriangle tri(mesh,vertI,normI,texI);
-					tri.attr = attr;
+					MeshTriangle* tri = new MeshTriangle(mesh,vertI,normI,texI);
+					tri->attr = attr;
 					mesh->triangleList.push_back(tri);
 
 					vertI[1]=vertI[2];
@@ -175,13 +182,15 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 			string basePath = objPath.substr(0,pos+1);
 			mtlPath = basePath+mtlPath;
 
-			parseMaterial(mtlPath,materialMap);
+			if(!parseMaterial(mtlPath,materialMap)) {
+				returnValue  = false;
+				break;
+			}
 		}
 	}
 
-
-
+	if(!returnValue) delete mesh;
 
 	file.close();
-	return true;
+	return returnValue;
 }

@@ -6,7 +6,8 @@ class Sphere : public IPrimitive
 {
 public:
 	Sphere(Point3 origin = Vec3(0,0,0),double radius = 1.0);
-	IntersectResult intersect(Ray& ray);
+	bool intersect(Ray& ray,IntersectResult& result);
+	AABB getAABB();
 protected:
 	Point3 origin;
 	double radius;

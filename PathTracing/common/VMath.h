@@ -4,6 +4,9 @@
 #include <math.h>
 const double EPS = 1e-5;
 
+const double DOUBLE_POSITIVE_INFINITY = 1e20;
+const double DOUBLE_NEGATIVE_INFINITY = -1e20;
+
 class Vec2;
 class Vec3;
 typedef Vec3 Color3;

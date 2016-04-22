@@ -8,14 +8,13 @@ const double EPS_LOOSE = 1e-8;
 
 double getFresnelIndex(double ni,double nt,double cosTheta)
 {
-	//schlick的fresnel反射系数近视
+	//fresnel反射系数的schlick近似
 	double f0 = (ni-nt)/(ni+nt); 
 	f0*=f0;
 	double schlick = f0 + (1-f0)* pow(1.0-cosTheta,5);
 
 	return schlick;
 }
-
 
 RayTracer::RayTracer()
 {
@@ -101,8 +100,8 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 	if(currDepth>=maxRecursiveDepth || Length2(weight)<EPS_LOOSE) 
 		return Color3::BLACK;
 
-	IntersectResult& result = scene.intersect(ray);
-	if(!result.isHit())  return Color3::BLACK;
+	IntersectResult result;	
+	if(!scene.intersect(ray,result))  return Color3::BLACK;
 	else 
 	{
 		Material& attr = result.primitive->attr;
@@ -223,7 +222,7 @@ void RayTracer::run(string obj_file)
 {
 	if(Parser::parse(obj_file,&scene))
 	{
-		scene.focusModel();
+		scene.init();
 		GlutDisplay::setRayTracer(this);
 		GlutDisplay::render();
 	}

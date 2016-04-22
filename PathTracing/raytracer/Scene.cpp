@@ -39,17 +39,22 @@ void Scene::setSize(int width,int height)
 int Scene::getWidth(){return width;}
 int Scene::getHeight(){return height;}
 
-IntersectResult Scene::intersect(Ray& ray)
+bool Scene::intersect(Ray& ray,IntersectResult& result)
 {
-	IntersectResult best;
-	best.distance = 1e20;
+	//bool hit = false;
+	//IntersectResult best;
 
-	for(std::vector<IPrimitive*>::iterator it = primitives.begin();it!=primitives.end();++it)
-	{
-		IntersectResult& result = (*it)->intersect(ray);
-		if(result.isHit()&&result.distance<best.distance) best = result;
-	}
-	return best;
+	//for(int i=0,len=primitives.size();i<len;++i)
+	//{
+	//	if(primitives[i]->intersect(ray,best)&&best.distance<result.distance)
+	//	{
+	//		hit = true;
+	//		result = best;
+	//	}
+	//}
+
+	//return hit;
+	return kdTree.intersect(ray,result);
 }
 
 Ray* Scene::getRays(double x,double y,int pxSampleNum)
@@ -71,8 +76,8 @@ Ray* Scene::getRays(double x,double y,int pxSampleNum)
 
 bool Scene::isInShadow(Ray& ray,IPrimitive* light)
 {
-	IntersectResult& shadowResult = intersect(ray);
-	if(shadowResult.isHit()&&shadowResult.primitive!=light) 
+	IntersectResult shadowResult;
+	if(intersect(ray,shadowResult)&&shadowResult.primitive!=light) 
 		return true;
 	else return false;
 }
@@ -94,7 +99,8 @@ Color3 Scene::directIllumination(IntersectResult& result,Ray& ray)
 void Scene::focusModel()
 {
 	//保证OBJ文件读取的模型能全部在视锥体内（因为相机的参数被固定）
-	Point3 min_xyz(1e20,1e20,1e20), max_xyz(-1e20,-1e20,-1e20);
+	Point3 min_xyz(DOUBLE_POSITIVE_INFINITY,DOUBLE_POSITIVE_INFINITY,DOUBLE_POSITIVE_INFINITY), 
+		max_xyz(DOUBLE_NEGATIVE_INFINITY,DOUBLE_NEGATIVE_INFINITY,DOUBLE_NEGATIVE_INFINITY);
 
 	for(int i=0,len = primitives.size();i<len;++i)
 	{
@@ -112,7 +118,8 @@ void Scene::focusModel()
 	}
 
 	double deltaX = -(max_xyz.x - min_xyz.x)/2-min_xyz.x,deltaY = -(max_xyz.y - min_xyz.y)/2-min_xyz.y,deltaZ = -max_xyz.z-3;
-	min_xyz = Vec3(1e20,1e20,1e20), max_xyz=Vec3(-1e20,-1e20,-1e20);
+	min_xyz = Vec3(DOUBLE_POSITIVE_INFINITY,DOUBLE_POSITIVE_INFINITY,DOUBLE_POSITIVE_INFINITY), 
+		max_xyz = Vec3(DOUBLE_NEGATIVE_INFINITY,DOUBLE_NEGATIVE_INFINITY,DOUBLE_NEGATIVE_INFINITY);
 
 	for(int i=0,len = primitives.size();i<len;++i)
 	{
@@ -167,6 +174,12 @@ void Scene::focusModel()
 			mesh->resizeVertices[j].z = vertex.z;
 		}
 
-		for(int j=0,len2 = mesh->triangleList.size();j<len2;++j) mesh->triangleList[j].resize();
+		mesh->init();
 	}
+}
+
+void Scene::init()
+{
+	focusModel();
+	kdTree.build(primitives);
 }
