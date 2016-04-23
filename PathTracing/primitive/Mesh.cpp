@@ -15,7 +15,10 @@ void MeshTriangle::init()
 	origin = pt1;
 	dx = pt2-pt1;
 	dy = pt3-pt1;
+
 	normal = Normalize(Cross(dx,dy));
+	barycentric = Mat4(pt1,pt2,pt3);
+	barycentric.inverse();
 }
 
 AABB MeshTriangle::getAABB()
@@ -102,12 +105,26 @@ bool MeshTriangle::intersect(Ray& ray,IntersectResult& result)
 	{
 		result.point = ray.getPoint(bestTime);
 		result.distance = bestTime;
-		result.normal = inside?-normal:normal;
+		result.normal = inside?-getNormal(result.point):getNormal(result.point);
 		result.primitive = this;
 		return true;
 	}
 
 	return false;
+}
+
+Vec2 MeshTriangle::getTextureCoordinate(const Vec3& point) 
+{
+	return barycentric * point;
+}
+
+Vec3 MeshTriangle::getNormal(const Vec3& point)
+{
+	Vec3 abg = barycentric * point;
+	return Normalize(
+		abg.x*(normI[0]!=-1?mesh->normals[normI[0]]:normal) +
+		abg.y*(normI[1]!=-1?mesh->normals[normI[1]]:normal) +
+		abg.z*(normI[2]!=-1?mesh->normals[normI[2]]:normal));
 }
 
 bool Mesh::intersect(Ray& ray,IntersectResult& result)

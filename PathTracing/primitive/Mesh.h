@@ -19,6 +19,9 @@ public:
 	AABB getAABB();
 	Color3 render(IntersectResult& result,Ray& ray,Scene* scene);
 
+	Vec2 getTextureCoordinate(const Vec3& point);
+	Vec3 getNormal(const Vec3& point);
+
 	Mesh* mesh;
 	int vertI[3];
 	int normI[3];
@@ -28,6 +31,7 @@ private:
 	Vec3 dx,dy;
 	Vec3 normal;
 	int lightSamples;
+	Mat4 barycentric;
 };
 
 class Mesh : public IPrimitive,public ILight

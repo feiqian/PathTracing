@@ -106,6 +106,8 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 		else if(type=="f")
 		{
 			int index = 0;
+			memset(normI,255,sizeof(normI));
+			memset(texI,255,sizeof(texI));
 
 			while (true)
 			{
@@ -171,7 +173,14 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 		else if(type=="usemtl")
 		{
 			file>>materialName;
-			attr = materialMap[materialName];
+			map<string,Material>::const_iterator it = materialMap.find(materialName);
+			if(it!=materialMap.end()) attr = it->second;
+			else
+			{
+				cout<<"material information about "+materialName+" not found in mtl file!"<<endl;
+				returnValue = false;
+				break;
+			}
 		}
 		else if(type=="mtllib")
 		{
@@ -187,6 +196,12 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 				break;
 			}
 		}
+	}
+
+	if(!materialMap.size())
+	{
+		returnValue = false;
+		cout<<"material information  of this model not found!"<<endl;
 	}
 
 	if(!returnValue) delete mesh;

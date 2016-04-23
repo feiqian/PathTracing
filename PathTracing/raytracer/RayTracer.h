@@ -16,7 +16,8 @@ public:
 
 private:
 	Color3 trace(Ray& ray,int currDepth = 0,Vec3 weight = Vec3(1,1,1));
-	Ray mcSelect(Ray& ray,IntersectResult& result,double& fresnelIndex);
+	Ray mcSelect(Ray& ray,IntersectResult& result,double& survival);
+	bool russianRoulette(double probability, double& survivor);
 	Vec3 importanceSampleUpperHemisphere(Vec3& upVector, double n=-1);
 
 	//TODO blockSize
@@ -24,6 +25,7 @@ private:
 	int pxSampleNum;//每个像素的采样数目
 	int mcSampleNum;//蒙特卡洛采样数目
 	int maxRecursiveDepth;//光线最大递归深度
+	bool useDirectLight;//是否使用直接光照
 
 	Scene scene;
 };

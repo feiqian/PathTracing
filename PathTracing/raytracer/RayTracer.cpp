@@ -20,10 +20,11 @@ double getFresnelIndex(double ni,double nt,double cosTheta)
 
 RayTracer::RayTracer()
 {
-	mcSampleNum = 0;
+	mcSampleNum = 20;
 	pxSampleNum = 0;
 	blockSize = 1;
 	maxRecursiveDepth = 5;
+	useDirectLight = true;
 }
 
 RayTracer::~RayTracer()
@@ -63,8 +64,8 @@ Color3** RayTracer::render()
 				do
 				{
 					Color3 rgb = Limit(trace(rays[i]),0,1);
-					Color3 prev2 = j?total2 / j:Color3::NONE;
 
+					Color3 prev2 = j?total2 / j:Color3::NONE;
 					if(Length2(rgb - prev2)<EPS_LOOSE)
 					{
 						++cnt2;
@@ -103,9 +104,6 @@ Color3** RayTracer::render()
  
 Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 {
-	if(currDepth>=maxRecursiveDepth || Length2(weight)<EPS_LOOSE) 
-		return Color3::BLACK;
-
 	IntersectResult result;	
 	if(!scene.intersect(ray,result))  return Color3::BLACK;
 	else 
@@ -113,91 +111,106 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 		Material& attr = result.primitive->attr;
 		Vec3 reflection = attr.kd+attr.ks;
 
-		Color3 indirectIllumination;
-		double fresnelIndex;
-		Ray& newRay = mcSelect(ray,result,fresnelIndex);
+		if(currDepth>=maxRecursiveDepth) 
+			return attr.emission;
+
+		//如果当前是间接光并且使用了直接光照，一旦hit了一个光源时，我们应该返回空，这样可以避免对直接光照的过采样
+		if(currDepth&&useDirectLight&&attr.emission!=Color3::BLACK) return Color3::BLACK;
+
+		Color3 indirectIllumination,directIllumination;
+		double survivalContribution;
+		Ray& newRay = mcSelect(ray,result,survivalContribution);
 
 		if(newRay.source != SOURCE::NONE)
 		{
-			indirectIllumination = trace(newRay,currDepth+1,reflection*weight);
+			indirectIllumination = trace(newRay,currDepth+1);
 
 			switch(newRay.source)
 			{
 			case SOURCE::DIFFUSE_REFLECT:
-				indirectIllumination = attr.kd*indirectIllumination;
+				indirectIllumination = attr.kd*survivalContribution*indirectIllumination;
 				break;
-			case SOURCE::SPECULA_REFLECT:
-				indirectIllumination = attr.ks*fresnelIndex*indirectIllumination*Dot(newRay.direction,result.normal);
+			case SOURCE::SPECULAR_REFLECT:
+				indirectIllumination = attr.ks*survivalContribution*indirectIllumination*Dot(newRay.direction,result.normal);
 				break;
 			case SOURCE::TRANSMISSON:
-				indirectIllumination = attr.ks*(1.0-fresnelIndex)*indirectIllumination;
+				indirectIllumination = attr.ks*survivalContribution*indirectIllumination;
 				break;
 			}
 		}
 
-		Color3& directIllumination= scene.directIllumination(result,ray);
+		if(useDirectLight) directIllumination = scene.directIllumination(result,ray);
 
 		return attr.emission + directIllumination + indirectIllumination;
 	}
 }
 
-Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& fresnelIndex)
+Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& survivalContribution)
 {
-	Ray newRay;
 	Material& attr = result.primitive->attr;
-	fresnelIndex = 1.0;
+	survivalContribution = 1.0;
 
+	Vec3 direction;
 	double num[2];
 	num[0]= Dot(attr.kd,Vec3(1,1,1));
 	num[1]= Dot(attr.ks,Vec3(1,1,1))+ num[0];
 
-	if(num[1]<=0) return newRay;
+	if(num[1]<=0) return Ray(result.point,direction);
 
-	double randNum = (double)rand()/RAND_MAX * num[1];
-	if(randNum<num[0]) 
+	if(attr.bUseFresnel&&attr.refractiveIndex!=1.0)
 	{
-		newRay.direction = importanceSampleUpperHemisphere(result.normal);
-		newRay.source = SOURCE::DIFFUSE_REFLECT;
-	}
-	else
-	{
-		if(attr.bUseFresnel&&attr.tf!=0.0)
+		double ni,nt;
+		double bInto = Dot(ray.direction,result.normal)>0?false:true;
+
+		if(!bInto) 
 		{
-			double ni,nt;
-			double bInto = Dot(ray.direction,result.normal)>0?false:true;
-
-			if(!bInto) 
-			{
-				ni = attr.refractiveIndex;
-				nt = 1.0;
-			}
-			else
-			{
-				ni= 1.0;
-				nt = attr.refractiveIndex;
-			}
-
-			if(Refract(ray.direction,bInto?result.normal:-result.normal,ni/nt,newRay.direction)) 
-			{
-				double cosTheta = bInto?Dot(-ray.direction,result.normal):Dot(newRay.direction,result.normal);
-				fresnelIndex = getFresnelIndex(ni,nt,cosTheta);
-			}
-		}
-
-		if(randNum<Dot(attr.ks*fresnelIndex,Vec3(1,1,1))+ num[0])
-		{
-			Vec3 prefectReflectDirection = Reflect(ray.direction,result.normal);
-			newRay.direction = importanceSampleUpperHemisphere(prefectReflectDirection,attr.shiness);
-			newRay.source = SOURCE::SPECULA_REFLECT;
+			ni = attr.refractiveIndex;
+			nt = 1.0;
 		}
 		else
 		{
-			newRay.source = SOURCE::TRANSMISSON;
+			ni= 1.0;
+			nt = attr.refractiveIndex;
+		}
+
+		if(Refract(ray.direction,bInto?result.normal:-result.normal,ni/nt,direction)) 
+		{
+			double cosTheta = bInto?Dot(-ray.direction,result.normal):Dot(direction,result.normal);
+			double fresnelIndex = getFresnelIndex(ni,nt,cosTheta);
+
+			//Reflection or refraction?
+			double transmissonSurvival;
+			if(russianRoulette(fresnelIndex,transmissonSurvival))
+			{
+				survivalContribution *= 1.0/transmissonSurvival * (1.0-fresnelIndex);
+				return Ray(result.point,direction,SOURCE::TRANSMISSON);
+			}
+			else survivalContribution *= 1.0/(1.0-transmissonSurvival) * fresnelIndex;
 		}
 	}
+	
+	//If reflection : diffuse or specular?
+	double specularSurvival;
+	if(russianRoulette(num[0]/num[1],specularSurvival))
+	{
+		survivalContribution *= 1.0/specularSurvival;
+		Vec3& prefectReflectDirection = Reflect(ray.direction,result.normal);
+		direction = importanceSampleUpperHemisphere(prefectReflectDirection,attr.shiness);
+		return Ray(result.point,direction,SOURCE::SPECULAR_REFLECT);
+	}
+	else
+	{
+		survivalContribution *= 1.0/(1.0-specularSurvival);
+		direction = importanceSampleUpperHemisphere(result.normal);
+		return Ray(result.point,direction,SOURCE::DIFFUSE_REFLECT);
+	}
+}
 
-	newRay.origin = result.point;
-	return newRay;
+bool RayTracer::russianRoulette(double probability, double& survival)
+{
+	survival = (double)rand()/RAND_MAX;
+	if (survival > probability) return true;
+	return false;
 }
 
 Vec3 RayTracer::importanceSampleUpperHemisphere(Vec3& up, double n)
