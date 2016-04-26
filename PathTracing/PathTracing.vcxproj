@@ -12,10 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\GlutDisplay.cpp" />
+    <ClCompile Include="common\Material.cpp" />
     <ClCompile Include="common\ObjParser.cpp" />
     <ClCompile Include="common\Parser.cpp" />
     <ClCompile Include="common\Timer.cpp" />
     <ClCompile Include="common\Utils.cpp" />
+    <ClCompile Include="light\AmbientLight.cpp" />
     <ClCompile Include="light\PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="primitive\Cube.cpp" />
@@ -39,6 +41,7 @@
     <ClInclude Include="common\Utils.h" />
     <ClInclude Include="common\VMath.h" />
     <ClInclude Include="common\IntersectResult.h" />
+    <ClInclude Include="light\AmbientLight.h" />
     <ClInclude Include="light\ILight.h" />
     <ClInclude Include="light\PointLight.h" />
     <ClInclude Include="primitive\Cube.h" />
@@ -84,14 +87,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)3rdparty\glut\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)3rdparty\glut\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)3rdparty;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib;$(LibraryPath)</LibraryPath>
     <IntDir>..\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)3rdparty\glut\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)3rdparty\glut\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)3rdparty;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib;$(LibraryPath)</LibraryPath>
     <IntDir>..\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -106,7 +109,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glut32.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,7 +128,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glut32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glut32.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/SAFESEH:NO %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>

@@ -1,9 +1,9 @@
 #include "Utils.h"
 #include "windows.h"
 
-std::vector<std::string> Utils::GetFiles(const std::string& folder, const std::string& fileExtension)
+std::vector<std::string> Utils::GetSubFolders(const std::string& folder)
 {
-	std::string path = folder+"\\*."+fileExtension;
+	std::string path = folder+"\\*.*";
 	std::vector<std::string> files;
 	struct _finddata_t file_info;
 
@@ -11,7 +11,8 @@ std::vector<std::string> Utils::GetFiles(const std::string& folder, const std::s
 
 	while (file_handler != -1)
 	{
-		if (!(file_info.attrib & _A_SUBDIR)) files.push_back(file_info.name);
+		if ((file_info.attrib & _A_SUBDIR)&&!(strcmp(file_info.name,".")==0||strcmp(file_info.name,"..")==0)) 
+			files.push_back(file_info.name);
 		if (_findnext(file_handler, &file_info) != 0) break;
 	}
 	_findclose(file_handler);

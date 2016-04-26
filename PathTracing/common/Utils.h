@@ -8,7 +8,7 @@
 
 struct Utils
 {
-	static std::vector<std::string> GetFiles(const std::string& folder, const std::string& fileExtension = std::string("*"));
+	static std::vector<std::string> GetSubFolders(const std::string& folder);
 	static void PrintProgress(double& progress,double increment);
 };
 

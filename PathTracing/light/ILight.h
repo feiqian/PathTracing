@@ -1,9 +1,8 @@
 #ifndef __ILIGHT_H__
 #define __ILIGHT_H__
+#include "../raytracer/Scene.h"
 #include "../common/IntersectResult.h"
 #include "../raytracer/Ray.h"
-#include "../common./Material.h"
-#include "../raytracer/Scene.h"
 
 class Scene;
 struct ILight

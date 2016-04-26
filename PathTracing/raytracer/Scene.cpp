@@ -82,13 +82,9 @@ bool Scene::isInShadow(Ray& ray,IPrimitive* light)
 Color3 Scene::directIllumination(IntersectResult& result,Ray& ray)
 {
 	Color3 color;
-	//TODO 没有考虑光源之间的相互遮挡
-	for(int i=0,len = primitives.size();i<len;++i)
+	for(int i=0,len=lights.size();i<len;++i)
 	{
-		ILight* light = NULL;
-		light = dynamic_cast<ILight*>(primitives[i]);
-		if(light == NULL) continue;
-		color += light->render(result,ray,this);
+		color += lights[i]->render(result,ray,this);
 	}
 	return color;
 }
@@ -130,7 +126,7 @@ void Scene::focusModel()
 
 			//居中模型
 			//vertex.x+= deltaX;
-			vertex.y+= deltaY;
+			//vertex.y+= deltaY;
 			//调整Z值
 			vertex.z+= deltaZ;
 
@@ -142,7 +138,6 @@ void Scene::focusModel()
 	}
 	
 	double rangeX = max_xyz.x - min_xyz.x,rangeY = max_xyz.y - min_xyz.y;
-	rangeX = max_xyz.x - min_xyz.x,rangeY = max_xyz.y - min_xyz.y;
 	double scale = max(rangeX,rangeY);
 
 	double max_scalar;
@@ -181,4 +176,12 @@ void Scene::init()
 {
 	focusModel();
 	kdTree.build(primitives);
+
+	for(int i=0,len = primitives.size();i<len;++i)
+	{
+		ILight* light = NULL;
+		light = dynamic_cast<ILight*>(primitives[i]);
+		if(light == NULL) continue;
+		lights.push_back(light);
+	}
 }

@@ -6,7 +6,7 @@ MeshTriangle::MeshTriangle(Mesh* mesh,int vertI[], int normI[], int texI[])
 	memcpy(this->vertI,vertI,sizeof(vertI)*3);
 	memcpy(this->normI,normI,sizeof(normI)*3);
 	memcpy(this->texI,texI,sizeof(texI)*3);
-	lightSamples = 1;
+	lightSamples = 3;
 }
 
 void MeshTriangle::init()
@@ -44,6 +44,7 @@ Color3 MeshTriangle::render(IntersectResult& result,Ray& ray,Scene* scene)
 
 	Color3 rgb;
 	Material& intersectAttr = result.primitive->attr;
+	Reflectance& ref = result.primitive->getReflectance(result.point);
 	double rate = 1.0 / lightSamples;
 
 	for (int i = 0; i < lightSamples; i++) {
@@ -58,23 +59,23 @@ Color3 MeshTriangle::render(IntersectResult& result,Ray& ray,Scene* scene)
 		{
 			Vec3 s = Normalize(r);
 
-			if(intersectAttr.kd!=Color3::BLACK)
+			if(ref.kd!=Color3::BLACK)
 			{
 				//calculate the diffuse color
 				double mDots = Dot(s,result.normal);
-				if(mDots>0.0) rgb+= mDots*intersectAttr.kd*intersectAttr.ka
-					*attr.emission/PI;
+				if(mDots>0.0) rgb+= mDots*ref.kd
+					*attr.emission/PI*rate;
 			}
 
-			if(intersectAttr.ks!=Color3::BLACK)
+			if(ref.ks!=Color3::BLACK)
 			{
 				//calculate the specular color
 				Vec3 v = ray.direction.flip();
 				Vec3 h = Normalize(s+v);
 				double mDotH = Dot(h,result.normal);
-				if(mDotH>0.0) rgb+= pow(mDotH,intersectAttr.shiness)*intersectAttr.ks
+				if(mDotH>0.0) rgb+= pow(mDotH,intersectAttr.shiness)*ref.ks
 					*attr.emission
-					*(intersectAttr.shiness+1)/(2*PI);
+					*(intersectAttr.shiness+1)/(2*PI)*rate;
 			}
 		}
 		else scene->isInShadow(Ray(result.point,r),this);
@@ -113,9 +114,13 @@ bool MeshTriangle::intersect(Ray& ray,IntersectResult& result)
 	return false;
 }
 
-Vec2 MeshTriangle::getTextureCoordinate(const Vec3& point) 
+Point2 MeshTriangle::getTextureCoordinate(const Point3& point)
 {
-	return barycentric * point;
+	Vec3 abg =  barycentric * point;
+	return 
+		abg.x*mesh->textures[texI[0]] +
+		abg.y*mesh->textures[texI[1]] +
+		abg.z*mesh->textures[texI[2]];
 }
 
 Vec3 MeshTriangle::getNormal(const Vec3& point)

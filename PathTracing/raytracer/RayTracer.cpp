@@ -20,8 +20,8 @@ double getFresnelIndex(double ni,double nt,double cosTheta)
 
 RayTracer::RayTracer()
 {
-	mcSampleNum = 20;
-	pxSampleNum = 0;
+	mcSampleNum = 1;
+	pxSampleNum = 1;
 	blockSize = 1;
 	maxRecursiveDepth = 5;
 	useDirectLight = true;
@@ -44,12 +44,11 @@ Color3** RayTracer::render()
 	double progress = 0,increment = 100.0/(width*height);
 
 	//只在Release模式下开启了OMP支持
-	#pragma omp parallel for num_threads(NUM_THREADS)
+	#pragma omp parallel for schedule(dynamic, 1) num_threads(NUM_THREADS)
 	for(int y=0;y<height;++y)
 	{
 		for(int x=0;x<width;++x)
 		{
-			//TODO do 2*2 subpixels
 			int i=0;
 			int cnt1=0;
 			Color3 total1;
@@ -93,9 +92,8 @@ Color3** RayTracer::render()
 			scene.color[y][x] = total1/i;
 			delete [] rays;
 
-			#ifdef _DEBUG
-				Utils::PrintProgress(progress,increment);
-			#endif // DEBUG
+			#pragma omp critical
+			Utils::PrintProgress(progress,increment);
 		}
 	}
 
@@ -105,11 +103,10 @@ Color3** RayTracer::render()
 Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 {
 	IntersectResult result;	
-	if(!scene.intersect(ray,result))  return Color3::BLACK;
+	if(!scene.intersect(ray,result)) return Color3::BLACK;
 	else 
 	{
 		Material& attr = result.primitive->attr;
-		Vec3 reflection = attr.kd+attr.ks;
 
 		if(currDepth>=maxRecursiveDepth) 
 			return attr.emission;
@@ -119,6 +116,8 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 
 		Color3 indirectIllumination,directIllumination;
 		double survivalContribution;
+
+		Reflectance& ref = result.primitive->getReflectance(result.point);
 		Ray& newRay = mcSelect(ray,result,survivalContribution);
 
 		if(newRay.source != SOURCE::NONE)
@@ -128,13 +127,13 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 			switch(newRay.source)
 			{
 			case SOURCE::DIFFUSE_REFLECT:
-				indirectIllumination = attr.kd*survivalContribution*indirectIllumination;
+				indirectIllumination = ref.kd*survivalContribution*indirectIllumination;
 				break;
 			case SOURCE::SPECULAR_REFLECT:
-				indirectIllumination = attr.ks*survivalContribution*indirectIllumination*Dot(newRay.direction,result.normal);
+				indirectIllumination = ref.ks*survivalContribution*indirectIllumination*Dot(newRay.direction,result.normal);
 				break;
 			case SOURCE::TRANSMISSON:
-				indirectIllumination = attr.ks*survivalContribution*indirectIllumination;
+				indirectIllumination = (1.0-ref.ks)*survivalContribution*indirectIllumination;
 				break;
 			}
 		}
@@ -148,12 +147,13 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& survivalContribution)
 {
 	Material& attr = result.primitive->attr;
+	Reflectance& ref = result.primitive->getReflectance(result.point);
 	survivalContribution = 1.0;
 
 	Vec3 direction;
 	double num[2];
-	num[0]= Dot(attr.kd,Vec3(1,1,1));
-	num[1]= Dot(attr.ks,Vec3(1,1,1))+ num[0];
+	num[0]= Dot(ref.kd,Vec3(1,1,1));
+	num[1]= Dot(ref.ks,Vec3(1,1,1))+ num[0];
 
 	if(num[1]<=0) return Ray(result.point,direction);
 

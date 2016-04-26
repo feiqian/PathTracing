@@ -30,3 +30,21 @@ void IPrimitive::scale(double x,double y,double z)
 	modelMatrix = ScaleMatrix(x,y,z) * modelMatrix;
 	modelMatrixInverse = modelMatrixInverse * ScaleMatrixInverse(x,y,z);
 }
+
+Point2 IPrimitive::getTextureCoordinate(const Point3& point)
+{
+	return Point2(point.x,point.y);
+}
+
+Reflectance IPrimitive::getReflectance(const Vec3& point)
+{
+	if(attr.kaTexture==NULL&&attr.kdTexture==NULL&&attr.ksTexture==NULL) return attr.ref;
+	Reflectance returnRef;
+	Point2 uv = getTextureCoordinate(point);
+
+	returnRef.ka = attr.kaTexture!=NULL?attr.ref.ka*attr.kaTexture->getColor(uv):attr.ref.ka;
+	returnRef.kd = attr.kdTexture!=NULL?attr.ref.kd*attr.kdTexture->getColor(uv):attr.ref.kd;
+	returnRef.ks = attr.ksTexture!=NULL?attr.ref.ks*attr.ksTexture->getColor(uv):attr.ref.ks;
+
+	return returnRef;
+}

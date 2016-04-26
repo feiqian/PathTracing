@@ -1,7 +1,8 @@
 #ifndef __AABB_H__
 #define __AABB_H__
 #include <iostream>
-#include "../primitive/IPrimitive.h"
+#include "../common/IntersectResult.h"
+#include "../raytracer/Ray.h"
 
 using namespace std;
 

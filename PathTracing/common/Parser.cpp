@@ -16,14 +16,14 @@ bool Parser::parse(std::string fileName,Scene* scene)
 	else
 	{
 		//自己建模的场景
-		PointLight* pointLight = new PointLight(Vec3(0,5,-5),Vec3::WHITE,1);
+		PointLight* pointLight = new PointLight(Vec3(0,5,-5),Vec3::WHITE);
 		scene->primitives.push_back(pointLight);
 
 		IPrimitive* sphere = new Sphere(Point3(2,0,-5),1);
 		Material attr;
-		attr.ka = Vec3(1,0,0);
-		attr.kd = Vec3(0.70,0.27,0.08);
-		attr.ks = Vec3(0.26,0.18,0.06);
+		attr.ref.ka = Vec3(1,0,0);
+		attr.ref.kd = Vec3(0.70,0.27,0.08);
+		attr.ref.ks = Vec3(0.26,0.18,0.06);
 		attr.shiness = 12.8;
 		sphere->attr = attr;
 		scene->primitives.push_back(sphere);
@@ -33,9 +33,9 @@ bool Parser::parse(std::string fileName,Scene* scene)
 		cube->rotate(-20,Vec3(1,0,0));
 		cube->translate(-1,0,-5);
 		Material attr2;
-		attr2.ka = Vec3(0,0,1);
-		attr2.kd = Vec3(0.41,0.1,0.41);
-		attr2.ks = Vec3(0.41,0.41,0.41);
+		attr2.ref.ka = Vec3(0,0,1);
+		attr2.ref.kd = Vec3(0.41,0.1,0.41);
+		attr2.ref.ks = Vec3(0.41,0.41,0.41);
 		attr2.shiness = 51.2;
 		cube->attr = attr2;
 		scene->primitives.push_back(cube);
@@ -48,9 +48,9 @@ bool Parser::parse(std::string fileName,Scene* scene)
 		Plane* plane6 = new Plane(Point3(-5,-5,10),Vec3(0,1000,0),Vec3(1000,0,0));//front
 
 		Material attr3;
-		attr3.ka = Vec3(1, 1, 1);
-		attr3.kd = Vec3(0.5, 0.5, 0.5);
-		attr3.ks = Vec3(0,0,0);
+		attr3.ref.ka = Vec3(1, 1, 1);
+		attr3.ref.kd = Vec3(0.5, 0.5, 0.5);
+		attr3.ref.ks = Vec3(0,0,0);
 		attr3.shiness = 89.6;
 		plane1->attr = attr3;
 		plane2->attr = attr3;

@@ -4,19 +4,20 @@
 #include <string>
 #include <map>
 
-bool parseMaterial(string mtlPath,map<string,Material>& mp)
+bool parseMaterial(string basePath,string mtlFile,map<string,Material>& mp)
 {
-	ifstream file(mtlPath);
+	ifstream file(basePath+mtlFile);
 	if(!file.is_open()) {
-		cout<<"mtl file:"+mtlPath+" not found!"<<endl;
+		cout<<"mtl file:"+mtlFile+" not found!"<<endl;
 		return false;
 	}
 
+	bool flag = false;
 	string type;
 	string materialName;
 	Material attr;
-	bool flag = false;
 	int illuminationModel;
+	string mapKa,mapKd,mapKs;
 
 	while(file>>type)
 	{
@@ -34,15 +35,15 @@ bool parseMaterial(string mtlPath,map<string,Material>& mp)
 		}
 		else if(type=="Kd")
 		{
-			file>>attr.kd.x>>attr.kd.y>>attr.kd.z;
+			file>>attr.ref.kd.x>>attr.ref.kd.y>>attr.ref.kd.z;
 		}
 		else if(type=="Ka")
 		{
-			file>>attr.ka.x>>attr.ka.y>>attr.ka.z;
+			file>>attr.ref.ka.x>>attr.ref.ka.y>>attr.ref.ka.z;
 		}
 		else if(type=="Ks")
 		{
-			file>>attr.ks.x>>attr.ks.y>>attr.ks.z;
+			file>>attr.ref.ks.x>>attr.ref.ks.y>>attr.ref.ks.z;
 		}
 		else if(type=="Ke")
 		{
@@ -64,6 +65,21 @@ bool parseMaterial(string mtlPath,map<string,Material>& mp)
 		{
 			file>>illuminationModel;
 			if(illuminationModel==5||illuminationModel==7) attr.bUseFresnel = true;
+		}
+		else if(type=="map_Ka")
+		{
+			file>>mapKa;
+			attr.kaTexture = new Texture(basePath+mapKa);
+		}
+		else if(type=="map_Kd")
+		{
+			file>>mapKd;
+			attr.kdTexture = new Texture(basePath+mapKd);
+		}
+		else if(type=="map_Ks")
+		{
+			file>>mapKs;
+			attr.ksTexture = new Texture(basePath+mapKs);
 		}
 	}
 
@@ -167,7 +183,7 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 		}
 		else if(type=="vt")
 		{
-			file>>vt.x>>vt.z;
+			file>>vt.x>>vt.y;
 			mesh->textures.push_back(vt);
 		}
 		else if(type=="usemtl")
@@ -184,14 +200,13 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 		}
 		else if(type=="mtllib")
 		{
-			string mtlPath;
-			file>>mtlPath;
+			string mtlFile;
+			file>>mtlFile;
 			
 			int pos = objPath.find_last_of('/');
 			string basePath = objPath.substr(0,pos+1);
-			mtlPath = basePath+mtlPath;
 
-			if(!parseMaterial(mtlPath,materialMap)) {
+			if(!parseMaterial(basePath,mtlFile,materialMap)) {
 				returnValue  = false;
 				break;
 			}

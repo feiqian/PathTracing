@@ -9,6 +9,7 @@
 #include "KdTree.h"
 using std::vector;
 
+struct ILight;
 class Scene
 {
 public:
@@ -26,9 +27,9 @@ public:
 	inline int getHeight(){return height;}
 
 	vector<IPrimitive*> primitives;
+	vector<ILight*> lights;
 	Camera* camera;
 	Color3** color;
-
 private:
 	void focusModel();
 

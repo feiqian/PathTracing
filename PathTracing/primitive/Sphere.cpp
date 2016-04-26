@@ -37,3 +37,13 @@ AABB Sphere::getAABB()
 {
 	return AABB(origin-radius,origin+radius);
 }
+
+Point2 Sphere::getTextureCoordinate(const Point3& point)
+{
+	double theta = acos((point.y - origin.y) / radius);
+	double phi = atan2(point.z - origin.y, point.x - origin.x);
+	phi = (phi < 0 ? phi + 2*M_PI : phi);
+	double u = 1 - (phi / (2 * M_PI));
+	double v = (M_PI - theta) / M_PI;
+	return Point2(u,v);
+}

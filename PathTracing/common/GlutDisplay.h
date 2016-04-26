@@ -1,6 +1,6 @@
 #ifndef __GLUT_DISPLAY_H__
 #define __GLUT_DISPLAY_H__
-#include "glut.h"
+#include "glut/glut.h"
 #include "../raytracer/RayTracer.h"
 
 class GlutDisplay

@@ -430,19 +430,6 @@ inline double Length2(const Vec2 &u)
 {
 	return u.x * u.x + u.y * u.y;
 }
-inline Vec2 Reflect(const Vec2 &i, const Vec2 &n)
-{
-	return i - 2.0f * Dot(n, i) * n;
-}
-inline Vec2 Refract(const Vec2 &i, const Vec2 &n, double eta)
-{
-	Vec2 r;
-	double ndoti = Dot(n, i), k = 1.0f - eta * eta * (1.0f - ndoti * ndoti);
-	if (k >= 0.0f) {
-		r = eta * i - n * (eta * ndoti + sqrt(k));
-	}
-	return r;
-}
 // ----------------------------------------------------------------------------------------------------------------------------
 
 inline Vec3 Cross(const Vec3 &u, const Vec3 &v)
@@ -476,6 +463,7 @@ inline bool Refract(const Vec3 &i, const Vec3 &n, double eta,Vec3& refractDirect
 		refractDirection = eta * i - n * (eta * ndoti + sqrt(k));
 		return true;
 	}
+	// total internal reflection. There is no refraction in this case
 	else return false;
 }
 inline Vec3 Limit(const Vec3& src, double bottom, double top)

@@ -19,7 +19,7 @@ public:
 	AABB getAABB();
 	Color3 render(IntersectResult& result,Ray& ray,Scene* scene);
 
-	Vec2 getTextureCoordinate(const Vec3& point);
+	Point2 getTextureCoordinate(const Point3& point);
 	Vec3 getNormal(const Vec3& point);
 
 	Mesh* mesh;

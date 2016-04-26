@@ -7,7 +7,7 @@ using namespace std;
 int main(int argc,char *argv[])
 {
 	string objDirectory="../data";	
-	vector<string> files = Utils::GetFiles(objDirectory,"obj");
+	vector<string> files = Utils::GetSubFolders(objDirectory);
 
 	if(files.size())
 	{
@@ -25,7 +25,7 @@ int main(int argc,char *argv[])
 			else cout<<"valid input"<<endl;
 		}
 
-		string objFile =  objDirectory+"/"+files[id];
+		string objFile =  objDirectory+"/"+files[id]+"/"+files[id]+".obj";
 		RayTracer* rayTracer = new RayTracer;
 		rayTracer->run(objFile);
 	}
