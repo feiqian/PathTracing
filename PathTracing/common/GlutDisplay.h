@@ -7,9 +7,9 @@ class GlutDisplay
 {
 public:
 	static void setRayTracer(RayTracer* rayTracer);
-	static void render();
+	static void loop(); 
 private:
-	static void _render();
+	static void render();
 	static void reshape(int w, int h);
 
 	static void motionCallBack(int x, int y );

@@ -41,53 +41,42 @@ void GlutDisplay::motionCallBack(int x, int y )
 	}
 }
 
-Color3** rgbArr ;
-
 void GlutDisplay::setRayTracer(RayTracer* rayTracer)
 {
 	GlutDisplay::rayTracer = rayTracer;
 	GlutDisplay::camera = rayTracer->getScene()->camera;
-	rgbArr = rayTracer->render();
 }
 
-
-void GlutDisplay::render()
+void GlutDisplay::loop()
 {
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(rayTracer->getScene()->getWidth(), rayTracer->getScene()->getHeight());
 	glutCreateWindow("Ray Tracer");
-	glutDisplayFunc(GlutDisplay::_render);
+	glutDisplayFunc(GlutDisplay::render);
+	glutIdleFunc(GlutDisplay::render);
 	//glutReshapeFunc(reshape);
 	//glutMouseFunc(mouseCallBack);
 	//glutMotionFunc(motionCallBack);
-	
 	glutMainLoop();
 }
 
-void GlutDisplay::_render()
+void GlutDisplay::render()
 {
 	Scene* scene = rayTracer->getScene();
 	int width = scene->getWidth(),height = scene->getHeight();
 
 	glClear(GL_COLOR_BUFFER_BIT);
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(0,width,0,height);
 
-	
-	glBegin(GL_POINTS);
-	for (int y = 0; y < height; ++y)  
-	{   
-		for (int x = 0; x < width; ++x)  
-		{  
-			Color3& rgb = rgbArr[y][x];
-			glColor3d(rgb.r,rgb.g,rgb.b);  
-			glVertex2f(x,y);  
-		}  
-	}  
-	glEnd();
+	float* color = rayTracer->render();
 
-	glFinish();
+	glRasterPos2i(0, 0);
+	glDrawPixels(width,height,GL_RGB,GL_FLOAT,(GLvoid *)color);		
+
+	glFlush();
 }

@@ -29,7 +29,7 @@ public:
 	vector<IPrimitive*> primitives;
 	vector<ILight*> lights;
 	Camera* camera;
-	Color3** color;
+	float* color;
 private:
 	void focusModel();
 

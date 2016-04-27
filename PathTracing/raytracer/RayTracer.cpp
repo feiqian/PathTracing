@@ -1,4 +1,5 @@
 #include <omp.h>
+#include "windows.h"
 #include "RayTracer.h"
 #include "../common/Parser.h"
 #include "../common/GlutDisplay.h"
@@ -20,11 +21,12 @@ double getFresnelIndex(double ni,double nt,double cosTheta)
 
 RayTracer::RayTracer()
 {
-	mcSampleNum = 1;
+	mcSampleNum = 100;
 	pxSampleNum = 1;
 	blockSize = 1;
 	maxRecursiveDepth = 5;
 	useDirectLight = true;
+	iterations = 0;
 }
 
 RayTracer::~RayTracer()
@@ -37,63 +39,40 @@ Scene* RayTracer::getScene()
 	return &scene;
 }
 
-Color3** RayTracer::render()
+float* RayTracer::render()
 {
-	TotalTimer renderTimer("rendering");
-	int width = scene.getWidth(),height = scene.getHeight();
-	double progress = 0,increment = 100.0/(width*height);
+	if(iterations>=mcSampleNum) return scene.color;
 
+	static CONSOLE_SCREEN_BUFFER_INFO info;
+	if(!iterations) GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE),&info);
+	else SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),info.dwCursorPosition);
+	
+	++iterations;
+	TotalTimer renderTimer("current iteration : "+to_string(iterations));
+
+	int width = scene.getWidth(),height = scene.getHeight();
 	//只在Release模式下开启了OMP支持
 	#pragma omp parallel for schedule(dynamic, 1) num_threads(NUM_THREADS)
 	for(int y=0;y<height;++y)
 	{
 		for(int x=0;x<width;++x)
 		{
-			int i=0;
-			int cnt1=0;
-			Color3 total1;
+			Color3 color;
 			Ray* rays = scene.getRays(x,y,pxSampleNum);
 
-			do 
+			for(int k=0;k<pxSampleNum;++k)
 			{
-				int j = 0;
-				int cnt2 = 0;
-				Color3 total2;
+				Color3& result = Limit(trace(rays[k]),0,1);
+				color+=result;
+			}
 
-				do
-				{
-					Color3 rgb = Limit(trace(rays[i]),0,1);
-
-					Color3 prev2 = j?total2 / j:Color3::NONE;
-					if(Length2(rgb - prev2)<EPS_LOOSE)
-					{
-						++cnt2;
-						if(cnt2 == 2) break;
-					}
-					else cnt2 = 0;
-
-					total2+=rgb;
-					++j;
-				}while (j<mcSampleNum);
-				total2/=j;
-
-				Color3 prev = i?total1 / i:Color3::NONE;
-				if(Length2(total1 - prev)<EPS_LOOSE)
-				{
-					++cnt1;
-					if(cnt1 == 2) break;
-				}
-				else cnt1 = 0;
-
-				total1+=total2;
-				++i;
-			} while (i<pxSampleNum);
-
-			scene.color[y][x] = total1/i;
+			color = color/pxSampleNum;
 			delete [] rays;
 
-			#pragma omp critical
-			Utils::PrintProgress(progress,increment);
+			int index =  y*width*3+x*3;
+			scene.color[index] = (scene.color[index] * (iterations-1) + color.r)/iterations;
+			scene.color[index+1] = (scene.color[index+1] * (iterations-1) + color.g)/iterations;
+			scene.color[index+2] = (scene.color[index+2] * (iterations-1) + color.b)/iterations;
 		}
 	}
 
@@ -193,14 +172,14 @@ Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& survivalContrib
 	double specularSurvival;
 	if(russianRoulette(num[0]/num[1],specularSurvival))
 	{
-		survivalContribution *= 1.0/specularSurvival;
+		//survivalContribution *= 1.0/specularSurvival;
 		Vec3& prefectReflectDirection = Reflect(ray.direction,result.normal);
 		direction = importanceSampleUpperHemisphere(prefectReflectDirection,attr.shiness);
 		return Ray(result.point,direction,SOURCE::SPECULAR_REFLECT);
 	}
 	else
 	{
-		survivalContribution *= 1.0/(1.0-specularSurvival);
+		//survivalContribution *= 1.0/(1.0-specularSurvival);
 		direction = importanceSampleUpperHemisphere(result.normal);
 		return Ray(result.point,direction,SOURCE::DIFFUSE_REFLECT);
 	}
@@ -238,10 +217,12 @@ Vec3 RayTracer::importanceSampleUpperHemisphere(Vec3& up, double n)
 
 void RayTracer::run(string obj_file)
 {
+	TotalTimer loadingModel("loading model");
 	if(Parser::parse(obj_file,&scene))
 	{
+		loadingModel.print();
 		scene.init();
 		GlutDisplay::setRayTracer(this);
-		GlutDisplay::render();
+		GlutDisplay::loop();
 	}
 }

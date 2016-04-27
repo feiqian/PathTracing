@@ -16,7 +16,7 @@ Color3 PointLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 		{
 			//calculate the diffuse color
 			double mDots = Dot(s,result.normal);
-			if(mDots>0.0) rgb+= mDots*ref.kd*ref.ka/PI;
+			if(mDots>0.0) rgb+= mDots*ref.kd*attr.emission/PI;
 		}
 		
 		if(ref.ks!=Color3::BLACK)

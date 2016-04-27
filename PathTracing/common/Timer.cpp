@@ -10,8 +10,3 @@ void TotalTimer::print() {
 TotalTimer::~TotalTimer() {
 	print();
 }
-
-void TotalTimer::restart(const std::string& msg) {
-	print();
-	this->TotalTimer::TotalTimer(msg);
-}

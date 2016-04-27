@@ -11,9 +11,8 @@ public:
 	RayTracer();
 	~RayTracer();
 	void run(string obj_file);
-	Color3** render();
 	Scene* getScene();
-
+	float* render();
 private:
 	Color3 trace(Ray& ray,int currDepth = 0,Vec3 weight = Vec3(1,1,1));
 	Ray mcSelect(Ray& ray,IntersectResult& result,double& survival);
@@ -27,6 +26,7 @@ private:
 	int maxRecursiveDepth;//光线最大递归深度
 	bool useDirectLight;//是否使用直接光照
 
+	int iterations;
 	Scene scene;
 };
 

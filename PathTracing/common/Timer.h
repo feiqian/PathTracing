@@ -40,7 +40,6 @@ public:
 	~TotalTimer();
 
 	void print();
-	void restart(const std::string& msg);
 
 	std::string msg;
 	Timer timer;

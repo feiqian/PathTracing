@@ -134,6 +134,19 @@ Vec3 MeshTriangle::getNormal(const Vec3& point)
 
 bool Mesh::intersect(Ray& ray,IntersectResult& result)
 {
+	//bool hit = false;
+	//IntersectResult best;
+
+	//for(int i=0,len=triangleList.size();i<len;++i)
+	//{
+	//	if(triangleList[i]->intersect(ray,best)&&best.distance<result.distance)
+	//	{
+	//		hit = true;
+	//		result = best;
+	//	}
+	//}
+
+	//return hit;
 	return kdTree.intersect(ray,result);
 }
 
