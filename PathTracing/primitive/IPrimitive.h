@@ -19,6 +19,7 @@ public:
 	virtual bool intersect(Ray& ray,IntersectResult& result) = 0;
 	virtual AABB getAABB() = 0;
 	virtual Point2 getTextureCoordinate(const Point3& point);
+	virtual bool shadowRayIntersect(Ray& ray,IntersectResult& result);
 
 	Ray getTransformRay(Ray& ray);
 	Vec3 getTransformNormal(Vec3 normal);

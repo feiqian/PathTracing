@@ -18,6 +18,7 @@ private:
 	Ray mcSelect(Ray& ray,IntersectResult& result,double& survival);
 	bool russianRoulette(double probability, double& survivor);
 	Vec3 importanceSampleUpperHemisphere(Vec3& upVector, double n=-1);
+	void writeResultImage();
 
 	//TODO blockSize
 	int blockSize;//像素块大小
@@ -25,6 +26,7 @@ private:
 	int mcSampleNum;//蒙特卡洛采样数目
 	int maxRecursiveDepth;//光线最大递归深度
 	bool useDirectLight;//是否使用直接光照
+	string resultPath;
 
 	int iterations;
 	Scene scene;

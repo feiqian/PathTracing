@@ -19,7 +19,7 @@ public:
 	void init();
 	bool intersect(Ray& ray,IntersectResult& result);
 	Ray* getRays(double x,double y,int pxSampleNum);
-	bool isInShadow(Ray& ray,IPrimitive* light);
+	bool isInShadow(Ray& ray);
 	Color3 directIllumination(IntersectResult& result,Ray& ray);
 	void setSize(int width,int height);
 

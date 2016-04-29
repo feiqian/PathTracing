@@ -104,35 +104,40 @@ bool KdTree::intersect(Ray& ray,IntersectResult& result)
 {
 	if(!box.intersect(ray,result)) return false;
 
-	bool hit1 = false, hit2 = false;
+	bool hit = false;
 
 	if(ray.direction.num[splitAxis]>=0)
 	{
-		if(low!=NULL)
-		{
-			hit1 = low->intersect(ray,result);
-			ray.setBounds(ray.getLowerBound(),result.distance);
-		}
-		if(high!=NULL) 
-		{
-			hit2 = high->intersect(ray,result);
-		}
+		if(low!=NULL) hit|= low->intersect(ray,result);
+		if(high!=NULL) hit|= high->intersect(ray,result);
 	}
 	else
 	{
-		if(high!=NULL) 
-		{
-			hit1 = high->intersect(ray,result);
-			ray.setBounds(ray.getLowerBound(),result.distance);
-		}
-
-		if(low!=NULL)
-		{
-			hit2 = low->intersect(ray,result);
-		}
+		if(high!=NULL) hit|= high->intersect(ray,result);
+		if(low!=NULL) hit|= low->intersect(ray,result);
 	}
 
-	return hit1||hit2;
+	return hit;
+}
+
+bool KdTree::shadowRayIntersect(Ray& ray,IntersectResult& result)
+{
+	if(!box.intersect(ray,result)) return false;
+
+	bool hit = false;
+
+	if(ray.direction.num[splitAxis]>=0)
+	{
+		if(low!=NULL) hit|= low->shadowRayIntersect(ray,result);
+		if(!hit&&high!=NULL) hit|= high->shadowRayIntersect(ray,result);
+	}
+	else
+	{
+		if(high!=NULL) hit|= high->shadowRayIntersect(ray,result);
+		if(!hit&&low!=NULL) hit|= low->shadowRayIntersect(ray,result);
+	}
+
+	return hit;
 }
 
 AABB KdTree::getAABB()

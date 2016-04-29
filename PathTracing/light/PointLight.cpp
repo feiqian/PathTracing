@@ -7,8 +7,10 @@ Color3 PointLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 	Reflectance& ref = result.primitive->getReflectance(result.point);
 	Vec3&r = origin - result.point;
 	double rr = Length(r);
+	Ray& shadowRay = Ray(result.point,r);
+	shadowRay.tMax = rr;
 
-	if(!scene->isInShadow(Ray(result.point,r),this))
+	if(!scene->isInShadow(shadowRay))
 	{
 		Vec3 s = Normalize(r);
 		
@@ -16,7 +18,7 @@ Color3 PointLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 		{
 			//calculate the diffuse color
 			double mDots = Dot(s,result.normal);
-			if(mDots>0.0) rgb+= mDots*ref.kd*attr.emission/PI;
+			if(mDots>0.0) rgb+= mDots*ref.kd*emission/PI;
 		}
 		
 		if(ref.ks!=Color3::BLACK)
@@ -26,7 +28,7 @@ Color3 PointLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 			Vec3 h = Normalize(s+v);
 			double mDotH = Dot(h,result.normal);
 			if(mDotH>0.0) rgb+= pow(mDotH,intersectAttr.shiness)*ref.ks
-				*attr.emission
+				*emission
 				*(intersectAttr.shiness+1)/(2*PI);
 		}
 	}

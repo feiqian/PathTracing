@@ -1,0 +1,7 @@
+Obj cornellbox.obj
+
+Camera
+lookat	0 -87.6 0 0 -86.6 0 0 0 1	
+res 600 600
+fov	70
+EndCamera

@@ -6,12 +6,11 @@ MeshTriangle::MeshTriangle(Mesh* mesh,int vertI[], int normI[], int texI[])
 	memcpy(this->vertI,vertI,sizeof(vertI)*3);
 	memcpy(this->normI,normI,sizeof(normI)*3);
 	memcpy(this->texI,texI,sizeof(texI)*3);
-	lightSamples = 3;
 }
 
 void MeshTriangle::init()
 {
-	Point3& pt1 =mesh->resizeVertices[vertI[0]],&pt2 = mesh->resizeVertices[vertI[1]],&pt3 = mesh->resizeVertices[vertI[2]];
+	Point3& pt1 =mesh->vertices[vertI[0]],&pt2 = mesh->vertices[vertI[1]],&pt3 = mesh->vertices[vertI[2]];
 	origin = pt1;
 	dx = pt2-pt1;
 	dy = pt3-pt1;
@@ -24,7 +23,7 @@ void MeshTriangle::init()
 AABB MeshTriangle::getAABB()
 {
 	Point3 low,high;
-	Point3& pt1 =mesh->resizeVertices[vertI[0]],&pt2 = mesh->resizeVertices[vertI[1]],&pt3 = mesh->resizeVertices[vertI[2]];
+	Point3& pt1 =mesh->vertices[vertI[0]],&pt2 = mesh->vertices[vertI[1]],&pt3 = mesh->vertices[vertI[2]];
 
 	low.x = min(pt1.x,min(pt2.x,pt3.x));
 	low.y = min(pt1.y,min(pt2.y,pt3.y));
@@ -37,60 +36,12 @@ AABB MeshTriangle::getAABB()
 	return AABB(low,high);
 }
 
-Color3 MeshTriangle::render(IntersectResult& result,Ray& ray,Scene* scene)
-{
-	//TODO 光源强度没有考虑距离因素
-	if(attr.emission==Color3::BLACK ||result.primitive==this) return Color3::BLACK;
-
-	Color3 rgb;
-	Material& intersectAttr = result.primitive->attr;
-	Reflectance& ref = result.primitive->getReflectance(result.point);
-	double rate = 1.0 / lightSamples;
-
-	for (int i = 0; i < lightSamples; i++) {
-		double sx = (double)rand() / RAND_MAX;
-		double sy = (double)rand() / RAND_MAX * (1.0-sx);
-		
-		Vec3 lightOrigin = origin + dx * sx + dy * sy;
-		Vec3&r = lightOrigin - result.point;
-		double rr = Length(r);
-
-		if(!scene->isInShadow(Ray(result.point,r),this))
-		{
-			Vec3 s = Normalize(r);
-
-			if(ref.kd!=Color3::BLACK)
-			{
-				//calculate the diffuse color
-				double mDots = Dot(s,result.normal);
-				if(mDots>0.0) rgb+= mDots*ref.kd
-					*attr.emission/PI*rate;
-			}
-
-			if(ref.ks!=Color3::BLACK)
-			{
-				//calculate the specular color
-				Vec3 v = ray.direction.flip();
-				Vec3 h = Normalize(s+v);
-				double mDotH = Dot(h,result.normal);
-				if(mDotH>0.0) rgb+= pow(mDotH,intersectAttr.shiness)*ref.ks
-					*attr.emission
-					*(intersectAttr.shiness+1)/(2*PI)*rate;
-			}
-		}
-		else scene->isInShadow(Ray(result.point,r),this);
-	}
-
-	return rgb;
-}
-
 bool MeshTriangle::intersect(Ray& ray,IntersectResult& result)
 {
 	double tmp = Dot(normal,ray.direction);
 
 	if(DoubleEquals(tmp,0)) return false;
-
-	bool inside = DoubleCompare(tmp,0)<0?false:true;
+	//if(DoubleCompare(tmp,0)>0&&ray.source!=SOURCE::TRANSMISSON) return false;
 
 	Vec3 v = origin - ray.origin;
 
@@ -106,8 +57,9 @@ bool MeshTriangle::intersect(Ray& ray,IntersectResult& result)
 	{
 		result.point = ray.getPoint(bestTime);
 		result.distance = bestTime;
-		result.normal = inside?-getNormal(result.point):getNormal(result.point);
+		result.normal = getNormal(result.point);
 		result.primitive = this;
+		ray.tMax = bestTime;
 		return true;
 	}
 
@@ -125,40 +77,25 @@ Point2 MeshTriangle::getTextureCoordinate(const Point3& point)
 
 Vec3 MeshTriangle::getNormal(const Vec3& point)
 {
+	if(normI[0]==-1||normI[1]==-1||normI[2]==-1) return normal;
+
 	Vec3 abg = barycentric * point;
 	return Normalize(
-		abg.x*(normI[0]!=-1?mesh->normals[normI[0]]:normal) +
-		abg.y*(normI[1]!=-1?mesh->normals[normI[1]]:normal) +
-		abg.z*(normI[2]!=-1?mesh->normals[normI[2]]:normal));
+		abg.x*(mesh->normals[normI[0]]) +
+		abg.y*(mesh->normals[normI[1]]) +
+		abg.z*(mesh->normals[normI[2]]));
 }
 
 bool Mesh::intersect(Ray& ray,IntersectResult& result)
 {
-	//bool hit = false;
-	//IntersectResult best;
-
-	//for(int i=0,len=triangleList.size();i<len;++i)
-	//{
-	//	if(triangleList[i]->intersect(ray,best)&&best.distance<result.distance)
-	//	{
-	//		hit = true;
-	//		result = best;
-	//	}
-	//}
-
-	//return hit;
 	return kdTree.intersect(ray,result);
 }
 
-Color3 Mesh::render(IntersectResult& result,Ray& ray,Scene* scene)
+bool Mesh::shadowRayIntersect(Ray& ray,IntersectResult& result)
 {
-	Color3 rgb;
-	for(int i=0,len=lights.size();i<len;++i)
-	{
-		rgb += ((MeshTriangle*)lights[i])->render(result,ray,scene);
-	}
-	return rgb;
+	return kdTree.shadowRayIntersect(ray,result);
 }
+
 
 AABB Mesh::getAABB()
 {
@@ -167,11 +104,5 @@ AABB Mesh::getAABB()
 
 void Mesh::init()
 {
-	for(int i=0,len = triangleList.size();i<len;++i) 
-	{
-		((MeshTriangle*)triangleList[i])->init();
-		if(triangleList[i]->attr.emission!=Color3::BLACK) lights.push_back(triangleList[i]);
-	}
-
 	kdTree.build(triangleList);
 }

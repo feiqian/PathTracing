@@ -27,6 +27,7 @@ bool Sphere::intersect(Ray& ray,IntersectResult& result)
 			result.distance = time1;
 			result.normal = Normalize(result.point-origin);
 			result.primitive = this;
+			ray.tMax = time1;
 			return true;
 		}
 		else if(time1<0&&time2>0)
@@ -35,6 +36,7 @@ bool Sphere::intersect(Ray& ray,IntersectResult& result)
 			result.distance = time2;
 			result.normal = -Normalize(result.point-origin);
 			result.primitive = this;
+			ray.tMax = time2;
 			return true;
 		}
 	}

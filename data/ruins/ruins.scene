@@ -1,0 +1,12 @@
+Obj ruins.obj
+Camera
+lookat -3.07111 8.5853  2.94773 -2.706568  7.654287  2.9657295 -0.00656296  0.0167603   0.999838
+res          512 512
+fov          60
+EndCamera
+AreaLight
+position            35.248    46.034    46.643
+intensity           200     200    200
+dx               3.084    -3.096    .345
+dy               -18.9     -14.64   36.78
+EndAreaLight

@@ -47,13 +47,18 @@ void GlutDisplay::setRayTracer(RayTracer* rayTracer)
 	GlutDisplay::camera = rayTracer->getScene()->camera;
 }
 
+void GlutDisplay::update()
+{
+	glutPostRedisplay();
+}
+
 void GlutDisplay::loop()
 {
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(rayTracer->getScene()->getWidth(), rayTracer->getScene()->getHeight());
 	glutCreateWindow("Ray Tracer");
 	glutDisplayFunc(GlutDisplay::render);
-	glutIdleFunc(GlutDisplay::render);
+	glutIdleFunc(GlutDisplay::update);
 	//glutReshapeFunc(reshape);
 	//glutMouseFunc(mouseCallBack);
 	//glutMotionFunc(motionCallBack);

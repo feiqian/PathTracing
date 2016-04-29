@@ -25,7 +25,7 @@ int main(int argc,char *argv[])
 			else cout<<"valid input"<<endl;
 		}
 
-		string objFile =  objDirectory+"/"+files[id]+"/"+files[id]+".obj";
+		string objFile =  objDirectory+"/"+files[id]+"/"+files[id]+".scene";
 		RayTracer* rayTracer = new RayTracer;
 		rayTracer->run(objFile);
 	}

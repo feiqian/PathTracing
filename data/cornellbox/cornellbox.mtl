@@ -1,80 +1,63 @@
-# The sphere Cornell Box as seen in Henrik Jensen's 
-# "Realistic Image Synthesis Using Photon Mapping" (Page 107 Fig. 9.10) in OBJ format.
-# Note that the real box is not a perfect cube, so
-# the faces are imperfect in this data set.
-#
-# Created by Guedis Cardenas and Morgan McGuire at Williams College, 2011
-# Released into the Public Domain.
-#
-# http://graphics.cs.williams.edu/data
-# http://www.graphics.cornell.edu/online/box/data.html
-# http://www.cs.cmu.edu/~djames/15-864/pics/cornellBox.jpg
-#
+# 3ds Max Wavefront OBJ Exporter v0.94b - (c)2007 guruware
+# File Created: 29.07.2009 00:57:25
 
-
-newmtl leftSphere
-    Ka 0.01 0.01 0.01
-    Kd 0.01 0.01 0.01
-    Ks 0.95 0.95 0.95
-    Ns 1000
-    illum 5
-    
-newmtl rightSphere
-    Ka 0.01 0.01 0.01
-    Kd 0.01 0.01 0.01
-    Ks 0.30 0.30 0.30
-    Tf 0.10 0.10 0.10
-    Ns 200
-    Ni 2.5
-    illum 7
-   
-newmtl floor
-    Ns 10.0000
-    Ni 1.5000
+newmtl BackWall
     illum 2
     Ka 0.7250 0.7100 0.6800
     Kd 0.7250 0.7100 0.6800
-	Ks 0 0 0
+    Ks 0.000000 0.000000 0.000000
+    Ke 0.000000 0.000000 0.000000
 
-newmtl ceiling
-    Ns 10.0000
-    Ni 1.5000
+newmtl Floor 
     illum 2
     Ka 0.7250 0.7100 0.6800
     Kd 0.7250 0.7100 0.6800
-    Ks 0.0000 0.0000 0.0000
+    Ks 0.000000 0.000000 0.000000
+    Ke 0.000000 0.000000 0.000000
 
-newmtl backWall
-	Ns 10.0000
-	Ni 1.5000
-	illum 2
-	Ka 0.7250 0.7100 0.6800
-	Kd 0.7250 0.7100 0.6800
-	Ks 0.0000 0.0000 0.0000
-	Ke 0.0000 0.0000 0.0000
-
-newmtl rightWall
-    Ns 10.0000
+newmtl RightWall
     illum 2
     Ka 0.161 0.133 0.427 # Blue
     Kd 0.161 0.133 0.427
-	Ks 0 0 0
-    
-newmtl leftWall
-	Ns 10.0000
-	illum 2
-	Ka 0.6300 0.0650 0.0500
-	Kd 0.6300 0.0650 0.0500
-	Ks 0 0 0
+    Ks 0.000000 0.000000 0.000000
+    Ke 0.000000 0.000000 0.000000
 
-newmtl light
-	Ns 10.0000
-	Ni 1.5000
-	d 1.0000
-	Tr 0.0000
-	Tf 1.0000 1.0000 1.0000 
-	illum 2
-	Ka 0.7800 0.7800 0.7800
-	Kd 0.7800 0.7800 0.7800
-    Ke 1 1 1
-	Ks 0 0 0
+newmtl LeftWall
+    illum 2
+    Ka 0.6300 0.0650 0.0500
+    Kd 0.6300 0.0650 0.0500
+    Ks 0.000000 0.000000 0.000000
+    Ke 0.000000 0.000000 0.000000
+
+newmtl Ceiling
+    Ns 9.999999
+    illum 2
+    Ka 0.7250 0.7100 0.6800
+    Kd 0.7250 0.7100 0.6800
+    Ks 0.000000 0.000000 0.000000
+    Ke 0.000000 0.000000 0.000000
+
+newmtl Light
+    illum 2
+    Ka 1.000000 1.000000 1.000000
+    Kd 0.000000 0.000000 0.000000
+    Ks 0.000000 0.000000 0.000000
+    Ke 50.000000 50.000000 50.000000
+
+newmtl MirrorBall
+    Ns 1000
+    illum 2
+    Ka 1.000000 1.000000 1.000000
+    Ks 1.000000 1.000000 1.000000
+    Ke 0.000000 0.000000 0.000000
+
+newmtl GlassBall
+    Ns 200
+    Ni 1.5000000
+    d 1.000000
+    Tr 1.000000
+    Tf 1.000000 1.000000 1.000000 
+    illum 7
+    Ka 1.000000 1.000000 1.000000
+    Ks 1.000000 1.000000 1.000000
+    Ke 0.000000 0.000000 0.000000

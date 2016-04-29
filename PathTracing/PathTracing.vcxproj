@@ -18,6 +18,7 @@
     <ClCompile Include="common\Timer.cpp" />
     <ClCompile Include="common\Utils.cpp" />
     <ClCompile Include="light\AmbientLight.cpp" />
+    <ClCompile Include="light\AreaLight.cpp" />
     <ClCompile Include="light\PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="primitive\Cube.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="common\VMath.h" />
     <ClInclude Include="common\IntersectResult.h" />
     <ClInclude Include="light\AmbientLight.h" />
+    <ClInclude Include="light\AreaLight.h" />
     <ClInclude Include="light\ILight.h" />
     <ClInclude Include="light\PointLight.h" />
     <ClInclude Include="primitive\Cube.h" />

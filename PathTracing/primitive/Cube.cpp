@@ -87,6 +87,7 @@ bool Cube::intersect(Ray& ray,IntersectResult& result)
 		result.normal = getTransformNormal(inNormal);
 		result.distance = tIn;
 		result.primitive = this;
+		ray.tMax = tIn;
 		return true;
 	}
 	return false;
@@ -94,5 +95,6 @@ bool Cube::intersect(Ray& ray,IntersectResult& result)
 
 AABB Cube::getAABB()
 {
+	//这里的AABB暂时有问题
 	return AABB(origin,origin+Vec3(length,height,width));
 }

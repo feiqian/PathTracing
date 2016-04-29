@@ -9,7 +9,7 @@ using namespace std;
 
 class Mesh;
 
-class MeshTriangle : public IPrimitive,public ILight
+class MeshTriangle : public IPrimitive
 {
 public:
 	MeshTriangle(Mesh* mesh,int vertI[], int normI[], int texI[]);
@@ -17,7 +17,6 @@ public:
 
 	bool intersect(Ray& ray,IntersectResult& result);
 	AABB getAABB();
-	Color3 render(IntersectResult& result,Ray& ray,Scene* scene);
 
 	Point2 getTextureCoordinate(const Point3& point);
 	Vec3 getNormal(const Vec3& point);
@@ -26,20 +25,20 @@ public:
 	int vertI[3];
 	int normI[3];
 	int texI[3];
-private:
+
 	Point3 origin;
 	Vec3 dx,dy;
 	Vec3 normal;
-	int lightSamples;
+private:
 	Mat4 barycentric;
 };
 
-class Mesh : public IPrimitive,public ILight
+class Mesh : public IPrimitive
 {
 public:
 	bool intersect(Ray& ray,IntersectResult& result);
+	bool shadowRayIntersect(Ray& ray,IntersectResult& result);
 	AABB getAABB();
-	Color3 render(IntersectResult& result,Ray& ray,Scene* scene);
 	void init();
 
 	vector<Point3> vertices;
@@ -50,7 +49,6 @@ public:
 	vector<IPrimitive*> triangleList;
 private:
 	KdTree kdTree;
-	vector<IPrimitive*> lights;
 };
 
 

@@ -28,6 +28,7 @@ bool Plane::intersect(Ray& ray,IntersectResult& result)
 			result.distance = bestTime;
 			result.normal = normal;
 			result.primitive = this;
+			ray.tMax = bestTime;
 			return true;
 		}
 	}

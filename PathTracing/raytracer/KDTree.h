@@ -20,6 +20,7 @@ public:
 	AABB getAABB();
 
 	bool intersect(Ray& ray,IntersectResult& result);
+	bool shadowRayIntersect(Ray& ray,IntersectResult& result);
 
 	static void partition(int axis, const vector<IPrimitive*>& all, vector<IPrimitive*>* lowVec, vector<IPrimitive*>* highVec);
 private:

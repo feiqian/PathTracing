@@ -1,23 +1,129 @@
 #include "Parser.h"
 #include "../primitive/Mesh.h"
+#include "../light/AreaLight.h"
 #include "ObjParser.h"
+#include <fstream>
+#include <string>
 
 bool Parser::parse(std::string fileName,Scene* scene)
 {
-	Camera* camera = new Camera;
-	scene->camera = camera;
-
-	if(fileName.find(".obj")!=-1)
+	if(fileName.find(".scene")!=-1)
 	{
-		Mesh* mesh = NULL;
-		if(ObjParser::parse(fileName,mesh)) scene->primitives.push_back(mesh);
-		else return false;
+		//解析场景
+		ifstream file(fileName);
+		if(!file.is_open()) {
+			cout<<"scene file:"+fileName+" not found!"<<endl;
+			return false;
+		}
+
+		int pos = fileName.find_last_of('/');
+		string basePath = fileName.substr(0,pos+1);
+
+		string type;
+		bool bError = false;
+
+		while(file>>type)
+		{
+			if(type=="Obj")
+			{
+				string objFileName;
+				file>>objFileName;
+				Mesh* mesh = NULL;
+				if(!ObjParser::parse(basePath+objFileName,mesh)) 
+				{
+					bError = true;
+					break;
+				}
+				else
+				{
+					for(int i=0,len=mesh->triangleList.size();i<len;++i)
+					{
+						MeshTriangle* tri = ((MeshTriangle*)mesh->triangleList[i]);
+						tri->init();
+						Material& attr = tri->attr;
+						if(attr.emission!=Color3::BLACK) 
+							scene->lights.push_back(new AreaLight(tri->origin,tri->dx,tri->dy,attr.emission));
+					}
+					mesh->init();
+					scene->primitives.push_back(mesh);
+				}
+			}
+			else if(type=="Camera")
+			{
+				Camera* camera = new Camera;
+				int width,height;
+				double fov;
+
+				while(file>>type)
+				{
+					if(type=="EndCamera")
+					{
+						camera->calcViewPort(fov,width,height);
+						scene->camera = camera;
+						break;
+					}
+					else if(type=="lookat")
+					{
+						Vec3 position,target,up;
+						file>>position.x>>position.y>>position.z>>target.x>>target.y>>target.z>>up.x>>up.y>>up.z;
+						camera->lookAt(position.x,position.y,position.z,target.x,target.y,target.z,up.x,up.y,up.z);
+					}
+					else if(type=="res")
+					{
+						file>>width>>height;
+					}
+					else if(type=="fov")
+					{
+						file>>fov;
+					}
+				}
+			}
+			else if(type=="AreaLight")
+			{
+				Vec3 origin,dx,dy,emission;
+				while (file>>type)
+				{
+					if(type=="EndAreaLight")
+					{
+						//默认加入矩形光源
+						scene->lights.push_back(new AreaLight(origin,dx,dy,emission));
+						scene->lights.push_back(new AreaLight(origin+dx+dy,-dx,-dy,emission));
+						break;
+					}
+					else if(type=="position")
+					{
+						file>>origin.x>>origin.y>>origin.z;
+					}
+					else if(type=="dx")
+					{
+						file>>dx.x>>dx.y>>dx.z;
+					}
+					else if(type=="dy")
+					{
+						file>>dy.x>>dy.y>>dy.z;
+					}
+					else if(type=="intensity")
+					{
+						file>>emission.x>>emission.y>>emission.z;
+					}
+				}
+			}
+		}
+
+		file.close();
+
+		return !bError;
+
 	}
 	else
 	{
-		//自己建模的场景
+		//自己建模的场景,现在渲染可能会有些问题
+
+		Camera* camera = new Camera;
+		scene->camera = camera;
+
 		PointLight* pointLight = new PointLight(Vec3(0,5,-5),Vec3::WHITE);
-		scene->primitives.push_back(pointLight);
+		scene->lights.push_back(pointLight);
 
 		IPrimitive* sphere = new Sphere(Point3(2,0,-5),1);
 		Material attr;

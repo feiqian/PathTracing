@@ -40,6 +40,6 @@ bool AABB::intersect(Ray& ray,IntersectResult& result)
 	if (tmax < 0) return false;
 	// if tmin > tmax, ray doesn't intersect AABB
 	if (tmin > tmax) return false;
-
+	
 	return ( tmin < ray.getUpperBound() && tmax > ray.getLowerBound());
 }

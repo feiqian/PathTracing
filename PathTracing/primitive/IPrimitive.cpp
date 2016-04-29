@@ -48,3 +48,8 @@ Reflectance IPrimitive::getReflectance(const Vec3& point)
 
 	return returnRef;
 }
+
+bool IPrimitive::shadowRayIntersect(Ray& ray,IntersectResult& result)
+{
+	return intersect(ray,result);
+}

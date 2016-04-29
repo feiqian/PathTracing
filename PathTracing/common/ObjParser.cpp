@@ -81,6 +81,7 @@ bool parseMaterial(string basePath,string mtlFile,map<string,Material>& mp)
 			file>>mapKs;
 			attr.ksTexture = new Texture(basePath+mapKs);
 		}
+		else file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
 
 	if(flag) mp.insert(make_pair(materialName,attr));
@@ -211,12 +212,13 @@ bool ObjParser::parse(string objPath,Mesh*& mesh)
 				break;
 			}
 		}
+		else file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
 
 	if(!materialMap.size())
 	{
 		returnValue = false;
-		cout<<"material information  of this model not found!"<<endl;
+		cout<<"material information  of this model not found : "<<objPath<<endl;
 	}
 
 	if(!returnValue) delete mesh;

@@ -5,8 +5,9 @@
 #include "../common/GlutDisplay.h"
 #include "../common/Utils.h"
 #include "../common/Timer.h"
+#include "FreeImage/FreeImage.h"
 
-#define NUM_THREADS 20
+#define NUM_THREADS 10
 const double EPS_LOOSE = 1e-8;
 
 double getFresnelIndex(double ni,double nt,double cosTheta)
@@ -21,7 +22,7 @@ double getFresnelIndex(double ni,double nt,double cosTheta)
 
 RayTracer::RayTracer()
 {
-	mcSampleNum = 100;
+	mcSampleNum = 10;
 	pxSampleNum = 1;
 	blockSize = 1;
 	maxRecursiveDepth = 5;
@@ -41,13 +42,18 @@ Scene* RayTracer::getScene()
 
 float* RayTracer::render()
 {
-	if(iterations>=mcSampleNum) return scene.color;
+	++iterations;
+
+	if(iterations>=mcSampleNum)
+	{
+		if(iterations-1==mcSampleNum) writeResultImage();
+		return scene.color;
+	}
 
 	static CONSOLE_SCREEN_BUFFER_INFO info;
 	if(!iterations) GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE),&info);
 	else SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),info.dwCursorPosition);
 	
-	++iterations;
 	TotalTimer renderTimer("current iteration : "+to_string(iterations));
 
 	int width = scene.getWidth(),height = scene.getHeight();
@@ -78,7 +84,7 @@ float* RayTracer::render()
 
 	return scene.color;
 }
- 
+
 Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 {
 	IntersectResult result;	
@@ -112,7 +118,7 @@ Color3 RayTracer::trace(Ray& ray,int currDepth,Vec3 weight)
 				indirectIllumination = ref.ks*survivalContribution*indirectIllumination*Dot(newRay.direction,result.normal);
 				break;
 			case SOURCE::TRANSMISSON:
-				indirectIllumination = (1.0-ref.ks)*survivalContribution*indirectIllumination;
+				indirectIllumination = survivalContribution*indirectIllumination;
 				break;
 			}
 		}
@@ -139,9 +145,10 @@ Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& survivalContrib
 	if(attr.bUseFresnel&&attr.refractiveIndex!=1.0)
 	{
 		double ni,nt;
-		double bInto = Dot(ray.direction,result.normal)>0?false:true;
+		double cosTheta = Dot(ray.direction,result.normal);
+		Vec3 normal = cosTheta<=0.0?result.normal:-result.normal;
 
-		if(!bInto) 
+		if(cosTheta>0.0) 
 		{
 			ni = attr.refractiveIndex;
 			nt = 1.0;
@@ -152,20 +159,21 @@ Ray RayTracer::mcSelect(Ray& ray,IntersectResult& result,double& survivalContrib
 			nt = attr.refractiveIndex;
 		}
 
-		if(Refract(ray.direction,bInto?result.normal:-result.normal,ni/nt,direction)) 
+		//Reflection or refraction?
+		double fresnelIndex = getFresnelIndex(ni,nt,abs(cosTheta));
+		double transmissonSurvival;
+		if(russianRoulette(fresnelIndex,transmissonSurvival))
 		{
-			double cosTheta = bInto?Dot(-ray.direction,result.normal):Dot(direction,result.normal);
-			double fresnelIndex = getFresnelIndex(ni,nt,cosTheta);
-
-			//Reflection or refraction?
-			double transmissonSurvival;
-			if(russianRoulette(fresnelIndex,transmissonSurvival))
-			{
-				survivalContribution *= 1.0/transmissonSurvival * (1.0-fresnelIndex);
+			//survivalContribution *= 1.0/transmissonSurvival;
+			if(Refract(ray.direction,normal,ni/nt,direction)) 
 				return Ray(result.point,direction,SOURCE::TRANSMISSON);
+			else
+			{
+				direction = Reflect(ray.direction,normal);
+				return Ray(result.point,direction,SOURCE::SPECULAR_REFLECT);
 			}
-			else survivalContribution *= 1.0/(1.0-transmissonSurvival) * fresnelIndex;
 		}
+		//else survivalContribution *= 1.0/(1.0-transmissonSurvival);
 	}
 	
 	//If reflection : diffuse or specular?
@@ -217,7 +225,12 @@ Vec3 RayTracer::importanceSampleUpperHemisphere(Vec3& up, double n)
 
 void RayTracer::run(string obj_file)
 {
+	int pos = obj_file.find_last_of('.');
+	string basePath = obj_file.substr(0,pos);
+	resultPath = basePath+"_spp"+to_string(mcSampleNum)+".bmp";
+
 	TotalTimer loadingModel("loading model");
+
 	if(Parser::parse(obj_file,&scene))
 	{
 		loadingModel.print();
@@ -225,4 +238,28 @@ void RayTracer::run(string obj_file)
 		GlutDisplay::setRayTracer(this);
 		GlutDisplay::loop();
 	}
+}
+
+void RayTracer::writeResultImage()
+{
+	int width = scene.getWidth(),height = scene.getHeight();
+
+	FreeImage_Initialise();
+	FIBITMAP* bitmap = FreeImage_Allocate(width,height,24);
+	RGBQUAD color;
+	for(int y=0;y<height;++y)
+	{
+		for(int x=0;x<width;++x)
+		{
+			int index =  y*width*3+x*3;
+			color.rgbRed = scene.color[index]*255;
+			color.rgbGreen = scene.color[index+1]*255;
+			color.rgbBlue = scene.color[index+2]*255;
+			FreeImage_SetPixelColor(bitmap,x,y,&color);
+		}
+	}
+
+	if(FreeImage_Save(FIF_BMP,bitmap,resultPath.c_str())) cout<<"write render image to "<<resultPath<<endl;
+
+	FreeImage_DeInitialise();
 }
