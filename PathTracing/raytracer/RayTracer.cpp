@@ -22,7 +22,7 @@ double getFresnelIndex(double ni,double nt,double cosTheta)
 
 RayTracer::RayTracer()
 {
-	mcSampleNum = 10;
+	mcSampleNum = 100;
 	pxSampleNum = 1;
 	blockSize = 1;
 	maxRecursiveDepth = 5;
@@ -44,7 +44,7 @@ float* RayTracer::render()
 {
 	++iterations;
 
-	if(iterations>=mcSampleNum)
+	if(iterations>mcSampleNum)
 	{
 		if(iterations-1==mcSampleNum) writeResultImage();
 		return scene.color;
@@ -225,9 +225,10 @@ Vec3 RayTracer::importanceSampleUpperHemisphere(Vec3& up, double n)
 
 void RayTracer::run(string obj_file)
 {
-	int pos = obj_file.find_last_of('.');
-	string basePath = obj_file.substr(0,pos);
-	resultPath = basePath+"_spp"+to_string(mcSampleNum)+".bmp";
+	int pos1 = obj_file.find_last_of('/');
+	int pos2 = obj_file.find_last_of('.');
+	string fileName = obj_file.substr(pos1+1,pos2-pos1-1);
+	resultPath = "../result/"+fileName+"_spp"+to_string(mcSampleNum)+".bmp";
 
 	TotalTimer loadingModel("loading model");
 
@@ -246,7 +247,8 @@ void RayTracer::writeResultImage()
 
 	FreeImage_Initialise();
 	FIBITMAP* bitmap = FreeImage_Allocate(width,height,24);
-	RGBQUAD color;
+	RGBQUAD color;
+
 	for(int y=0;y<height;++y)
 	{
 		for(int x=0;x<width;++x)

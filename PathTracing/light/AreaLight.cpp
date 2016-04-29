@@ -36,6 +36,8 @@ Color3 AreaLight::render(IntersectResult& result,Ray& ray,Scene* scene)
 			double geoFactor = cosThetaIn*cosThetaOut / (rr*rr);
 			// Probability: 1/area.
 			Vec3 intensity = geoFactor * area * emission * rate;
+			
+			//Vec3 intensity =  emission * rate;
 
 			if(ref.kd!=Color3::BLACK)
 			{

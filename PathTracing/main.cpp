@@ -19,7 +19,7 @@ int main(int argc,char *argv[])
 		int id;
 		while(true)
 		{
-			cout<<"please choose one obj file to render: ";
+			cout<<"please choose one scene to render: ";
 			cin>>id;
 			if(id>=0&&id<files.size()) break;
 			else cout<<"valid input"<<endl;

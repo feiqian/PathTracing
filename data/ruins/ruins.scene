@@ -6,7 +6,7 @@ fov          60
 EndCamera
 AreaLight
 position            35.248    46.034    46.643
-intensity           200     200    200
+intensity           1000     1000    1000
 dx               3.084    -3.096    .345
 dy               -18.9     -14.64   36.78
 EndAreaLight
